@@ -1,0 +1,17 @@
+/* Post Styles */
+.post {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+  }
+  
+  .post h3 {
+    margin: 0;
+  }
+  
+  .post p {
+    margin: 5px 0;
+  }
+  
