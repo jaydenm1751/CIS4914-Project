@@ -1,6 +1,5 @@
 import React from 'react';
 import './Home.css';
-import NavBar from './NavBar';
 import SubleasePost from './SubleasePost';
 
 const Home = () => {
@@ -24,9 +23,6 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      {/* Navbar */}
-      <NavBar />
-
       {/* Sublease Posts */}
       <div className="post-list">
         {subleasePosts.map((post) => (

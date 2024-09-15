@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './NavBar.css';
+import logo from '../../assets/images/logo.png'; // Import the logo image
 
 const NavBar = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -9,12 +10,18 @@ const NavBar = () => {
     navigate('/search'); // Navigate to the search page
   };
 
+  const handleLogoClick = () => {
+    navigate('/'); // Navigate to the home page
+  };
+
   return (
     <nav className="navbar">
-      <div className="navbar-logo">Subleaser</div>
+      <div className="navbar-logo" onClick={handleLogoClick}>
+        <img src={logo} alt="Subleaser Logo" className="logo-image" /> {/* Use the logo image */}
+      </div>
       <div className="navbar-search">
         <button className="search-button" onClick={handleSearchClick}>
-          Search
+          Search Apartments
         </button>
       </div>
       <div className="navbar-menu">
