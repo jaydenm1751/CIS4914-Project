@@ -1,0 +1,85 @@
+.profile-page {
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-right: 20px;
+  }
+  
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .profile-name {
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  .profile-follow-info {
+    font-size: 16px;
+    margin: 5px 0;
+  }
+  
+  .profile-status {
+    font-size: 16px;
+    margin: 5px 0;
+    font-weight: bold;
+  }
+  
+  .profile-location {
+    font-size: 16px;
+    margin: 5px 0;
+    color: #555;
+  }
+  
+  .profile-description {
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+  }
+  
+  .description-item {
+    margin-bottom: 20px;
+  }
+  
+  .description-item h2 {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
+  
+  .description-item p {
+    margin: 0;
+  }
+  
+  .description-item a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .description-item a:hover {
+    text-decoration: underline;
+  }
+  
+
+  .description-item-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .description-item-container > div {
+    flex: 1;
+    min-width: 200px; 
+  }
+  
