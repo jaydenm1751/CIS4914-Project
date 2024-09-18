@@ -30,6 +30,7 @@ const NavBar = () => {
           <a href="/profile">Profile</a>
           <a href="/favorites">Favorites</a>
           <a href="/messages">Messages</a>
+          <a href="/login">Login</a>
         </div>
       </div>
     </nav>
