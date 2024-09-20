@@ -31,6 +31,7 @@ const NavBar = () => {
           <a href="/favorites">Favorites</a>
           <a href="/messages">Messages</a>
           <a href="/login">Login</a>
+          <a href="/register">Sign Up</a>
         </div>
       </div>
     </nav>
