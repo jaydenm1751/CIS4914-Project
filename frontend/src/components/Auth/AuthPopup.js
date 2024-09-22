@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../../config/firebase';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/auth';
 import './AuthPopup.css'; 
 
 const AuthPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [newUser, setNewUser] = useState(false);
+  const [user, setUser] = useState(null);
 
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
   const loginEmailAndPassword = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -20,7 +20,6 @@ const AuthPopup = () => {
       console.error(error);
     }
   }
-
   const registerEmailAndPassword = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -28,18 +27,16 @@ const AuthPopup = () => {
       console.error(error);
     }
   }
-
-  const logout = async () => {
-    try{
-      await signOut(auth);
-    } catch (error) {
+  const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    
+    signInWithPopup(auth, provider)
+    .then((result) => {
+      setUser(result.user);
+    }).catch((error) => {
       console.error(error);
-    }
+    });
   }
-
-  const [newUser, setNewUser] = useState(false);
-  const [user, setUser] = useState(null);
-
   useEffect(() => {
     onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -55,6 +52,7 @@ const AuthPopup = () => {
         <div className="popup-overlay">
           <div className="popup-content">    
             {!newUser ? <h2 className='popup-text'>Log In</h2> : <h2 className='popup-text'>Sign Up</h2>}
+            <button onClick={loginWithGoogle}>Log In with Google</button>
             <input 
               type = "email"
               placeholder = "Email..."
