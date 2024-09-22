@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './NavBar.css';
 import logo from '../../assets/images/logo.png'; // Import the logo image
+import Auth from '../Auth/Auth';
 
 const NavBar = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -24,13 +25,13 @@ const NavBar = () => {
           Search Apartments
         </button>
       </div>
+      <Auth />
       <div className="navbar-menu">
         <button className="menu-button">Menu</button>
         <div className="dropdown-content">
           <a href="/profile">Profile</a>
           <a href="/favorites">Favorites</a>
           <a href="/messages">Messages</a>
-          <a href="/login">Login</a>
         </div>
       </div>
     </nav>
