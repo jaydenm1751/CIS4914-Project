@@ -8,41 +8,58 @@ const AuthPopup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newUser, setNewUser] = useState(false);
-  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
 
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
   const loginEmailAndPassword = async () => {
     try {
+      setError(null);
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error(error);
+    } catch(err) {
+      console.log(err.code);
+
+      switch (err.code) {
+        case 'auth/invalid-email':
+          setError("Invalid email or password.");
+          break;
+        case 'auth/invalid-credential':
+          setError("Invalid email or password.");
+          break;
+        default:
+          console.error(err.code);
+      }
     }
   }
   const registerEmailAndPassword = async () => {
     try {
+      setError(null);
       await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          setError("This email is unavailable");
+          break;
+        case 'auth/weak-password':
+          setError("The password is too weak.");
+          break;
+        default:
+          console.error(err.code);
+      }
     }
   }
   const loginWithGoogle = async () => {
+    setError(null);
     const provider = new GoogleAuthProvider();
     
     signInWithPopup(auth, provider)
-    .then((result) => {
-      setUser(result.user);
-    }).catch((error) => {
-      console.error(error);
+    .catch((err) => {
+      console.error(err);
     });
   }
-  useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      console.log(user?.email);
-    });
-  }, []);
 
   return (
     <div>
@@ -52,7 +69,6 @@ const AuthPopup = () => {
         <div className="popup-overlay">
           <div className="popup-content">    
             {!newUser ? <h2 className='popup-text'>Log In</h2> : <h2 className='popup-text'>Sign Up</h2>}
-            <button onClick={loginWithGoogle}>Log In with Google</button>
             <input 
               type = "email"
               placeholder = "Email..."
@@ -63,6 +79,7 @@ const AuthPopup = () => {
               placeholder = "Password..."
               onChange={(e) => setPassword(e.target.value)}
             />
+            {error && <p className='popup-text'>{error}</p>}
             {!newUser ? (
               <div>
                 <button onClick={loginEmailAndPassword}>
@@ -81,7 +98,8 @@ const AuthPopup = () => {
                   Already have an account? <span className="blue-text" onClick={() => {setNewUser(false)}}>Log In</span>
                 </p>
               </div>
-            )};            
+            )}; 
+            <button onClick={loginWithGoogle}>Log In with Google</button>           
             <button className="close-button" onClick={togglePopup}>Close</button>
           </div>
         </div>
