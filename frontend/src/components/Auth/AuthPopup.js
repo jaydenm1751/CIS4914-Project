@@ -1,67 +1,16 @@
-import React, { useState } from 'react';
-import { auth } from '../../config/firebase';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/auth';
+import React, { act, useState } from 'react';
+import Login from './Login';
+import Signup from './Signup';
+import ResetPassword from './ResetPassword';
 import './AuthPopup.css'; 
 
 const AuthPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [newUser, setNewUser] = useState(false);
-  const [error, setError] = useState(null);
+  const [activeScreen, setActiveScreen] = useState(1); // 1==Login, 2==Sign Up, 3==Reset Password
 
   const togglePopup = () => {
     setIsOpen(!isOpen);
   };
-  const loginEmailAndPassword = async () => {
-    try {
-      setError(null); // Reset error state before attempt
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch(err) {
-      console.log(err.code);
-
-      // Handle specific Firebase auth errors
-      switch (err.code) {
-        case 'auth/invalid-email':
-          setError("Invalid email or password.");
-          break;
-        case 'auth/invalid-credential':
-          setError("Invalid email or password.");
-          break;
-        default:
-          console.error(err.code);
-      }
-    }
-  }
-  const registerEmailAndPassword = async () => {
-    try {
-      setError(null); // Reset error state before attempt
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      console.error(err);
-
-      // Handle specific Firebase auth errors
-      switch (err.code) {
-        case 'auth/email-already-in-use':
-          setError("This email is unavailable");
-          break;
-        case 'auth/weak-password':
-          setError("The password is too weak.");
-          break;
-        default:
-          console.error(err.code);
-      }
-    }
-  }
-  const loginWithGoogle = async () => {
-    setError(null);
-    const provider = new GoogleAuthProvider();
-    
-    signInWithPopup(auth, provider)
-    .catch((err) => {
-      console.error(err);
-    });
-  }
 
   return (
     <div>
@@ -69,41 +18,33 @@ const AuthPopup = () => {
 
       {isOpen && (
         <div className="popup-overlay">
-          <div className="popup-content">    
-            {!newUser ? <h2 className='popup-text'>Log In</h2> : <h2 className='popup-text'>Sign Up</h2>}
+          <div className="popup-content">
+            {activeScreen === 1 && 
+              <div>
+                <Login />
+                <p className='popup-text'>
+                    Forgot Password? <span className="blue-text" onClick={() => setActiveScreen(3)}>Reset Password</span>
+                </p>
+                <p className='popup-text'>
+                    New to Subleaser? <span className="blue-text" onClick={() => setActiveScreen(2)}>Sign Up</span>
+                </p>
+              </div>
+            }
+            {activeScreen === 2 && (
+              <div>
+                <Signup />
+                <p className='popup-text'>
+                  Already have an account? <span className="blue-text" onClick={() => setActiveScreen(1)}>Log In</span>
+                </p>
+              </div>
+            )}
+            {activeScreen === 3 && (
+              <div>
+                <ResetPassword />
+                <button onClick={() => setActiveScreen(1)}>Cancel</button>
+              </div>
+            )}
             
-            <input 
-              type = "email"
-              placeholder = "Email..."
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <input 
-              type = "password"
-              placeholder = "Password..."
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            {error && <p className='popup-text'>{error}</p>}
-
-            {!newUser ? (
-              <div>
-                <button onClick={loginEmailAndPassword}>Log In</button>
-
-                <p className='popup-text'>
-                  New to Subleaser? <span className="blue-text" onClick={() => {setNewUser(true)}}>Sign Up</span>
-                </p>
-              </div>
-            ) : (
-              <div>
-                <button onClick={registerEmailAndPassword}>Sign Up</button>
-
-                <p className='popup-text'>
-                  Already have an account? <span className="blue-text" onClick={() => {setNewUser(false)}}>Log In</span>
-                </p>
-              </div>
-            )};             
-            <button onClick={loginWithGoogle}>Log In with Google</button>           
             <button className="close-button" onClick={togglePopup}>Close</button>
           </div>
         </div>
