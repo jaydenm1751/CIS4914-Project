@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { auth } from '../../config/firebase';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/auth';
 import './AuthPopup.css'; 
@@ -15,11 +15,12 @@ const AuthPopup = () => {
   };
   const loginEmailAndPassword = async () => {
     try {
-      setError(null);
+      setError(null); // Reset error state before attempt
       await signInWithEmailAndPassword(auth, email, password);
     } catch(err) {
       console.log(err.code);
 
+      // Handle specific Firebase auth errors
       switch (err.code) {
         case 'auth/invalid-email':
           setError("Invalid email or password.");
@@ -34,11 +35,12 @@ const AuthPopup = () => {
   }
   const registerEmailAndPassword = async () => {
     try {
-      setError(null);
+      setError(null); // Reset error state before attempt
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
       console.error(err);
 
+      // Handle specific Firebase auth errors
       switch (err.code) {
         case 'auth/email-already-in-use':
           setError("This email is unavailable");
@@ -69,36 +71,38 @@ const AuthPopup = () => {
         <div className="popup-overlay">
           <div className="popup-content">    
             {!newUser ? <h2 className='popup-text'>Log In</h2> : <h2 className='popup-text'>Sign Up</h2>}
+            
             <input 
               type = "email"
               placeholder = "Email..."
               onChange={(e) => setEmail(e.target.value)}
             />
+
             <input 
               type = "password"
               placeholder = "Password..."
               onChange={(e) => setPassword(e.target.value)}
             />
+
             {error && <p className='popup-text'>{error}</p>}
+
             {!newUser ? (
               <div>
-                <button onClick={loginEmailAndPassword}>
-                  Log In
-                </button>
+                <button onClick={loginEmailAndPassword}>Log In</button>
+
                 <p className='popup-text'>
                   New to Subleaser? <span className="blue-text" onClick={() => {setNewUser(true)}}>Sign Up</span>
                 </p>
               </div>
             ) : (
               <div>
-                <button onClick={registerEmailAndPassword}>
-                  Sign Up
-                </button>
+                <button onClick={registerEmailAndPassword}>Sign Up</button>
+
                 <p className='popup-text'>
                   Already have an account? <span className="blue-text" onClick={() => {setNewUser(false)}}>Log In</span>
                 </p>
               </div>
-            )}; 
+            )};             
             <button onClick={loginWithGoogle}>Log In with Google</button>           
             <button className="close-button" onClick={togglePopup}>Close</button>
           </div>
