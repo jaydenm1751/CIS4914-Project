@@ -8,11 +8,9 @@ import './Auth.css';
 const Auth = () => {
   const { user } = useContext(UserContext);
 
-  // Function to log out the current authenticated user
   const logout = async () => {
       try{
         console.log("logging out user")
-        // Firebase sign-out function
         await signOut(auth);
       } catch (error) {
         console.error("Error during sign-out:", error);

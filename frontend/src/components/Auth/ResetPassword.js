@@ -6,6 +6,7 @@ import './AuthPopup.css';
 const AuthPopup = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const resetPassword = async () => {
     try {
@@ -14,10 +15,9 @@ const AuthPopup = () => {
         setError("Please enter your email to reset your password.");
         return;
       }
-
-      // Firebase method to send the reset email
+      
       await sendPasswordResetEmail(auth, email);
-      setError("Password reset email sent! Please check your inbox.");
+      setSuccess("Password reset email sent! Please check your inbox.");
     } catch (err) {
       switch (err.code) {
         case 'auth/user-not-found':
@@ -41,6 +41,13 @@ const AuthPopup = () => {
             placeholder = "Email..."
             onChange={(e) => setEmail(e.target.value)}
         />
+
+        {success && 
+            <div>
+                <p className='popup-text'>{success}</p>
+                
+            </div>
+        }
 
         {error && <p className='popup-text'>{error}</p>}
               

@@ -3,10 +3,8 @@ import { auth } from '../../config/firebase';
 import { 
   signInWithEmailAndPassword, 
   signInWithPopup, 
-  GoogleAuthProvider, 
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail
- } from 'firebase/auth';
+  GoogleAuthProvider
+} from 'firebase/auth';
 import './AuthPopup.css'; 
 
 const AuthPopup = () => {
@@ -20,8 +18,7 @@ const AuthPopup = () => {
       await signInWithEmailAndPassword(auth, email, password);
     } catch(err) {
       console.log(err.code);
-
-      // Handle specific Firebase auth errors
+      
       switch (err.code) {
         case 'auth/invalid-email':
           setError("Invalid email or password.");

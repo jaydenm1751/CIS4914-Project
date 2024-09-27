@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
 import { auth } from '../../config/firebase';
-import { 
-  signInWithEmailAndPassword, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail
- } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import './AuthPopup.css'; 
 
 const AuthPopup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [newUser, setNewUser] = useState(false);
   const [error, setError] = useState(null);
 
   const registerEmailAndPassword = async () => {
@@ -21,8 +14,7 @@ const AuthPopup = () => {
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
       console.error(err);
-
-      // Handle specific Firebase auth errors
+      
       switch (err.code) {
         case 'auth/email-already-in-use':
           setError("This email is unavailable");
@@ -39,7 +31,7 @@ const AuthPopup = () => {
   return (
     <div>
         <h2 className='popup-text'>Sign Up</h2>
-        
+
         <input 
             type = "email"
             placeholder = "Email..."
