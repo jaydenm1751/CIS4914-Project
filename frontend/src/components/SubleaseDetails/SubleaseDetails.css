@@ -1,0 +1,20 @@
+.sublease-details {
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-width: 600px;
+    margin: auto;
+  }
+  
+  .sublease-details-image {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .sublease-details h3 {
+    color: #0056b3; /* Blue heading */
+  }
+  

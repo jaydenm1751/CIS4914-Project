@@ -1,17 +1,86 @@
-/* Post Styles */
-.post {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-  }
-  
-  .post h3 {
-    margin: 0;
-  }
-  
-  .post p {
-    margin: 5px 0;
-  }
-  
+.sublease-post {
+  display: flex;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.sublease-post-rank {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #ff7a00;
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.sublease-post-image {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.sublease-post-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sublease-post-details h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+  color: #0056b3; /* Similar to the blue heading in the screenshot */
+}
+
+.sublease-post-beds-baths-sqft {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.sublease-post-rent {
+  font-size: 18px; 
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.rent-amount {
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 5px;
+  color: #004494;
+}
+
+.rent-text {
+  font-size: 16px;
+}
+
+.sublease-post-button {
+  background-color: #0056b3; /* Blue button */
+  color: white;
+  font-size: 16px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  min-width: 100px;
+  max-width: 150px;  
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.sublease-post-button:hover {
+  background-color: #004494; /* Darker blue for hover */
+}
