@@ -6,18 +6,21 @@ import Search from './components/Search/Search.js';
 import Messages from './components/Messages/Messages.js';
 import Favorites from './components/Favorites/Favorites.js';
 import NavBar from './components/NavBar/NavBar.js';
+import UserContextProvider from './contexts/UserContext.js';
 
 function App() {
   return (
     <div>
-      <NavBar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/messages" element={<Messages />} />
-        <Route path="/favorites" element={<Favorites />} />
-      </Routes>
+      <UserContextProvider>
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/favorites" element={<Favorites />} />
+        </Routes>
+      </UserContextProvider>
     </div> 
   );
 }

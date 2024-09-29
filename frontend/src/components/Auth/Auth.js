@@ -1,36 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { auth } from '../../config/firebase';
-import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
+import { UserContext } from '../../contexts/UserContext';
 import AuthPopup from './AuthPopup';
 import './Auth.css';
 
 const Auth = () => {
-    const [user, setUser] = useState(null);
+  const { user } = useContext(UserContext);
 
-    const logout = async () => {
-        try{
-          await signOut(auth);
-        } catch (error) {
-          console.error(error);
-        }
+  const logout = async () => {
+      try{
+        console.log("logging out user")
+        await signOut(auth);
+      } catch (error) {
+        console.error("Error during sign-out:", error);
       }
+    }
 
-    useEffect(() => {
-        onAuthStateChanged(auth, (currentUser) => {
-          setUser(currentUser);
-          console.log(user?.email);
-        });
-      }, []);
-
-    return (
-        <div>
-            {user ? (
-                <button className='logout-button' onClick={logout}>Log Out</button>
-            ) : (
-                <AuthPopup />
-            )}
-        </div>
-    );
+  return (
+      <div>
+          {user ? (
+              <button className='logout-button' onClick={logout}>Log Out</button>
+          ) : (
+              <AuthPopup />
+          )}
+      </div>
+  );
 };
 
 export default Auth;
