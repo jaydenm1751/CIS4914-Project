@@ -1,104 +1,75 @@
 import React, { useState } from 'react';
 import './CreatePost.css'; // Custom CSS file for styling
+import { db } from "../../config/firebase";
+import { collection, addDoc } from 'firebase/firestore';
 
 function CreatePost() {
   // State hooks to manage form fields
-  const [monthlyRent, setMonthlyRent] = useState('');
-  const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [photo, setPhoto] = useState(null);
+  const [title, setTitle] = useState("");
+  const [rent, setRent] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
 
   // Handle file input change
-  const handlePhotoChange = (e) => {
-    setPhoto(e.target.files[0]);
-  };
+  // const handlePhotoChange = (e) => {
+  //   setPhoto(e.target.files[0]);
+  // };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleCreatePost = async (e) => {
     e.preventDefault();
-    const formData = {
-      monthlyRent,
-      address,
-      phone,
-      startDate,
-      endDate,
-      photo,
-    };
-    console.log('Form Data Submitted: ', formData);
-    // Here, you would normally send formData to your backend server
+    try {
+      await addDoc(collection(db, "posts"), {
+        title: title,
+        rent: rent,
+        description: description,
+        location: location,
+        createdAt: new Date(),
+      })
+      console.log("Post added Successfully");
+      //Clears form after creation
+      setTitle("");
+      setRent("");
+      setDescription("");
+      setLocation("");
+
+    } catch (error) {
+      console.error("Error adding post: ", error);
+    }
   };
 
   return (
     <div className="create-post-container">
       <h2>Create a Sublease Post</h2>
-      <form onSubmit={handleSubmit} className="create-post-form">
-        {/* Monthly Rent Input */}
-        <label>
-          Monthly Rent ($):
-          <input
-            type="number"
-            value={monthlyRent}
-            onChange={(e) => setMonthlyRent(e.target.value)}
-            required
-            placeholder="e.g., 1200"
-          />
-        </label>
-
-        {/* Address Input */}
-        <label>
-          Address:
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-            placeholder="e.g., 123 Main St, City, State"
-          />
-        </label>
-
-        {/* Phone Number Input */}
-        <label>
-          Phone Number:
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
-            placeholder="e.g., (123) 456-7890"
-          />
-        </label>
-
-        {/* Lease Start and End Date Inputs */}
-        <label>
-          Lease Start Date:
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-          />
-        </label>
-
-        <label>
-          Lease End Date:
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            required
-          />
-        </label>
-
-        {/* Upload Photo Input */}
-        <label>
-          Upload Photo:
-          <input type="file" accept="image/*" onChange={handlePhotoChange} />
-        </label>
-
-        {/* Submit Button */}
-        <button type="submit">Submit Post</button>
+      <form onSubmit={handleCreatePost}>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title"
+          required
+        />
+        <input
+          type="text"
+          value={rent}
+          onChange={(e) => setRent(e.target.value)}
+          placeholder="Rent"
+          required
+        />
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Description"
+          required
+        />
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Location"
+          required
+        />
+        <button type="submit">Create Post</button>
       </form>
     </div>
   );
