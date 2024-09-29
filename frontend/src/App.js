@@ -6,6 +6,7 @@ import Search from './components/Search/Search.js';
 import Messages from './components/Messages/Messages.js';
 import Favorites from './components/Favorites/Favorites.js';
 import NavBar from './components/NavBar/NavBar.js';
+import SubleaseDetails from './components/SubleaseDetails/SubleaseDetails.js';
 import UserContextProvider from './contexts/UserContext.js';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/sublease/:id" element={<SubleaseDetails />} />
         </Routes>
       </UserContextProvider>
     </div> 
