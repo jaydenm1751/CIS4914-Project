@@ -3,6 +3,7 @@ import './Home.css';
 import {collection, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import SubleasePost from './SubleasePost';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   // const subleasePosts = [
@@ -24,6 +25,7 @@ const Home = () => {
   // ];
 
   const [subleasePosts, setSubleasePosts] = useState([]);
+  const navigate = useNavigate(); // for navigation
   
   useEffect(() => {
     const fetchSubleasePosts = async () => {
