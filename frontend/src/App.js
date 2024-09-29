@@ -7,6 +7,7 @@ import Messages from './components/Messages/Messages.js';
 import Favorites from './components/Favorites/Favorites.js';
 import NavBar from './components/NavBar/NavBar.js';
 import UserContextProvider from './contexts/UserContext.js';
+import CreatePost from './components/CreatePost/CreatePost.js';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/CreatePost" element={<CreatePost />} />
         </Routes>
       </UserContextProvider>
     </div> 
