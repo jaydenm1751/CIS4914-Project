@@ -1,13 +1,12 @@
 import React from 'react';
 import './SubleasePost.css';
 
-const SubleasePost = ({ title, rent, description, location }) => {
+const SubleasePost = ({ address, rent, imageUrl }) => {
   return (
     <div className="post">
-      <h3>{title}</h3>
-      <p>{rent}</p>
-      <p>{description}</p>
-      <p>{location}</p>
+      <img src={imageUrl} alt="Sublease" className="post-image" />
+      <h3>{`${address.street}, ${address.city}, ${address.state} ${address.zip}`}</h3>
+      <p>Rent: {rent}</p>
     </div>
   );
 };

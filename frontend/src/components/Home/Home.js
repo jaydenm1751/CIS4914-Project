@@ -6,17 +6,25 @@ const Home = () => {
   const subleasePosts = [
     {
       id: 1,
-      title: '2 Bedroom Apartment in Downtown',
+      address: {
+        street: '123 Main St',
+        city: 'City Name',
+        state: 'State Name',
+        zip: '12345',
+      },
       rent: '$1200/month',
-      description: 'A spacious 2 bedroom apartment with all amenities included.',
-      location: 'Downtown, City Name',
+      imageUrl: 'https://via.placeholder.com/150', // Example image URL
     },
     {
       id: 2,
-      title: 'Studio Apartment Near University',
+      address: {
+        street: '456 University Ave',
+        city: 'City Name',
+        state: 'State Name',
+        zip: '67890',
+      },
       rent: '$800/month',
-      description: 'Cozy studio apartment, perfect for students, near campus.',
-      location: 'University Area, City Name',
+      imageUrl: 'https://via.placeholder.com/150', // Example image URL
     },
     // Add more sublease posts as needed
   ];
@@ -28,10 +36,9 @@ const Home = () => {
         {subleasePosts.map((post) => (
           <SubleasePost
             key={post.id}
-            title={post.title}
+            address={post.address}
             rent={post.rent}
-            description={post.description}
-            location={post.location}
+            imageUrl={post.imageUrl} // Pass the image URL to SubleasePost
           />
         ))}
       </div>
