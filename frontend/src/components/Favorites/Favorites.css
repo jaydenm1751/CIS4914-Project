@@ -1,60 +1,25 @@
-.favorites-page {
-    padding: 20px;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-.favorites-title {
-    text-align: center; /* Center the title */
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
 .favorites-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.favorite-item {
-    display: flex;
-    background-color: #fff;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.favorite-image {
-    width: 150px;
-    height: 100px;
-    object-fit: cover; /* Ensure the image covers the space without distortion */
-    margin-right: 20px;
-}
-
-.favorite-details {
-    flex: 1; /* Take the remaining space */
-}
-
-.favorite-details h2 {
-    font-size: 18px;
-    margin: 0 0 5px;
-}
-
-.favorite-details p {
-    margin: 0;
-    color: #555; /* Slightly lighter color for readability */
-}
-
-button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
-}
+    margin: 0 auto;
+    padding-left: 150px;
+    padding-right: 150px;
+  }
+  
+  .favorites-title {
+    text-align: center; /* Center the title */
+    margin-top: 20px; /* Add some space at the top */
+    font-size: 2em; /* Increase the font size */
+    font-weight: bold;
+  }
+  
+  .post-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .post-list {
+      grid-template-columns: 1fr;
+    }
+  }
+  
