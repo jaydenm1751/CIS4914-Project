@@ -9,6 +9,7 @@ import NavBar from './components/NavBar/NavBar.js';
 import SubleaseDetails from './components/SubleaseDetails/SubleaseDetails.js';
 import UserContextProvider from './contexts/UserContext.js';
 import CreatePost from './components/CreatePost/CreatePost.js';
+import AuthRedirect from './components/Auth/AuthRedirect.js';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/sublease/:id" element={<SubleaseDetails />} />
           <Route path="/CreatePost" element={<CreatePost />} />
+          <Route path="/login-redirect" element={<AuthRedirect />} />
         </Routes>
       </UserContextProvider>
     </div> 
