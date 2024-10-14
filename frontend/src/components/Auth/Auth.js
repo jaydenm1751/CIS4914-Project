@@ -1,30 +1,40 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { auth } from '../../config/firebase';
-import { signOut } from 'firebase/auth';
-import { UserContext } from '../../contexts/UserContext';
-import AuthPopup from './AuthPopup';
+import { React, useState } from 'react';
 import './Auth.css';
+import Login from './Login';
+import Signup from './Signup';
+import ResetPassword from './ResetPassword';
 
 const Auth = () => {
-  const { user } = useContext(UserContext);
-
-  const logout = async () => {
-      try{
-        console.log("logging out user")
-        await signOut(auth);
-      } catch (error) {
-        console.error("Error during sign-out:", error);
-      }
-    }
+  const [activeScreen, setActiveScreen] = useState(1); // 1==Login, 2==Sign Up, 3==Reset Password
 
   return (
-      <div>
-          {user ? (
-              <button className='logout-button' onClick={logout}>Log Out</button>
+    <div>
+          {activeScreen === 0 ? (
+            <div>
+              <ResetPassword />
+              <button onClick={() => setActiveScreen(1)}>Cancel</button>
+            </div>
           ) : (
-              <AuthPopup />
+            <div>
+              {activeScreen === 1 && 
+                <div>
+                  <Login />
+                  <p className='popup-text'>
+                      Forgot Password? <span className="blue-text" onClick={() => setActiveScreen(3)}>Reset Password</span>
+                  </p>
+                </div>
+              }
+              {activeScreen === 2 && (
+                <div>
+                  <Signup />
+                  <p className='popup-text'>
+                    Already have an account? <span className="blue-text" onClick={() => setActiveScreen(1)}>Log In</span>
+                  </p>
+                </div>
+              )}
+            </div>
           )}
-      </div>
+    </div>
   );
 };
 

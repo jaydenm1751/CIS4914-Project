@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './NavBar.css';
 import logo from '../../assets/images/logo.png'; // Import the logo image
-import Auth from '../Auth/Auth';
+import AuthPopup from '../Auth/AuthPopup.js';
 
 const NavBar = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -25,7 +25,7 @@ const NavBar = () => {
           Search Apartments
         </button>
       </div>
-      <Auth />
+      <AuthPopup />
       <div className="navbar-menu">
         <button className="menu-button">Menu</button>
         <div className="dropdown-content">

@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { auth } from '../../config/firebase';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import './AuthPopup.css'; 
+import './Auth.css'; 
+import {
+  Button,
+  Typography,
+  TextField,
+} from '@mui/material';
 
-const AuthPopup = () => {
+const ResetPassword = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -34,26 +39,39 @@ const AuthPopup = () => {
 
   return (
     <div>
-        <h2 className='popup-text'>Reset Password</h2>
+      <Typography variant='h6' align="center" sx={{ fontWeight: 'bold' }}>
+        Forgot your password?
+      </Typography>
 
-        <input 
-            type = "email"
-            placeholder = "Email..."
-            onChange={(e) => setEmail(e.target.value)}
-        />
+      <Typography variant='body1' align="center">
+        Enter your email and we'll send you a password reset link.
+      </Typography>
 
-        {success && 
-            <div>
-                <p className='popup-text'>{success}</p>
-                
-            </div>
-        }
+      {/* Email Field */}
+      <Typography variant="body1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Email
+      </Typography>
+      <TextField
+          label="Enter email"
+          variant="outlined"
+          fullWidth
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+      />
 
-        {error && <p className='popup-text'>{error}</p>}
-              
-        <button onClick={resetPassword}>Send Password Reset</button>
+      {error && <Typography color="red" align="center" sx={{ marginTop: 2 }}>{error}</Typography>}
+
+      <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ marginTop: 2 }}
+          onClick={resetPassword}
+      >
+          Send
+      </Button>
     </div>
   );
 };
 
-export default AuthPopup;
+export default ResetPassword;
