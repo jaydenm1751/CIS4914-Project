@@ -1,39 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Favorites.css'; 
 import SubleasePost from '../Home/SubleasePost'; 
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../config/firebase'; // Assuming you have Firebase config set up
 
 const Favorites = () => {
-  const favoriteListings = [
-    {
-      id: 1,
-      title: '2 Bedroom Apartment in Downtown',
-      rent: '$1200/month',
-      description: 'A spacious 2 bedroom apartment with all amenities included.',
-      location: 'Downtown, City Name',
-    },
-    {
-      id: 2,
-      title: 'Studio Apartment Near University',
-      rent: '$800/month',
-      description: 'Cozy studio apartment, perfect for students, near campus.',
-      location: 'University Area, City Name',
-    },
-  
-  ];
+  const [favoriteListings, setFavoriteListings] = useState([]);
+
+  useEffect(() => {
+    const fetchFavoriteListings = async () => {
+      try {
+        // Fetch sublease posts from Firestore (assumed to be the 'subleases' collection)
+        const querySnapshot = await getDocs(collection(db, 'subleases'));
+        const allSubleases = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Filter favorite listings - assuming favorite IDs are managed and stored
+        const favoriteIDs = ['DFKmLzV5WFosN96kLOb9', 'anotherFavoriteID']; // Replace this with dynamic favorite management logic
+        const favorites = allSubleases.filter(sublease => favoriteIDs.includes(sublease.id));
+
+        setFavoriteListings(favorites);
+      } catch (error) {
+        console.error('Error fetching favorite listings: ', error);
+      }
+    };
+
+    fetchFavoriteListings();
+  }, []);
 
   return (
-    <div className="favorites-page">
-      <h1 className="favorites-title">Favorited Sublease Postings</h1>
+    <div className="favorites-container">
+      <h1 className="favorites-title">Favorite Listings</h1>
       <div className="post-list">
-        {favoriteListings.map((listing) => (
-          <SubleasePost
-            key={listing.id}
-            title={listing.title}
-            rent={listing.rent}
-            description={listing.description}
-            location={listing.location}
-          />
-        ))}
+        {favoriteListings.length > 0 ? (
+          favoriteListings.map((post) => (
+            <SubleasePost
+              key={post.id}
+              id={post.id}
+              address={post.address}
+              rent={post.rent}
+              numBedrooms={post.numBedrooms}
+              numBathrooms={post.numBathrooms}
+              sqft={post.sqft}
+              imageUrl={post.imageUrl}
+            />
+          ))
+        ) : (
+          <p>No favorite listings yet!</p>
+        )}
       </div>
     </div>
   );
