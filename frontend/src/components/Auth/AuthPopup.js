@@ -1,5 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { auth } from '../../config/firebase';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider
+} from 'firebase/auth';
 import { signOut } from 'firebase/auth';
 import { UserContext } from '../../contexts/UserContext';
 import './Auth.css';
@@ -29,6 +33,7 @@ const AuthPopup = () => {
 
     const [isOpen, setIsOpen] = useState(false);
     const [tabIndex, setTabIndex] = useState(0);
+    const [error, setError] = useState(null);
 
     const togglePopup = () => {
         setIsOpen(!isOpen);
@@ -47,6 +52,16 @@ const AuthPopup = () => {
     const handleTabChange = (event, newValue) => {
         setTabIndex(newValue);
     };
+
+    const loginWithGoogle = async () => {
+      setError(null);
+      const provider = new GoogleAuthProvider();
+      
+      signInWithPopup(auth, provider)
+      .catch((err) => {
+        console.error(err);
+      });
+    }
 
     return (
         <div className="App">
@@ -131,7 +146,7 @@ const AuthPopup = () => {
                                             variant="contained"
                                             color="white"
                                             fullWidth
-                                            onClick={() => alert('Google button clicked')}
+                                            onClick={() => loginWithGoogle()}
                                             sx={{
                                                 marginTop: 2,
                                                 display: 'flex', // Use flex layout

@@ -3,6 +3,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { UserContext } from '../../contexts/UserContext';
+import { auth } from '../../config/firebase';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider
+} from 'firebase/auth';
 import Login from './Login';
 import Signup from './Signup';
 import ResetPassword from './ResetPassword';
@@ -24,8 +29,7 @@ const AuthRedirect = () => {
   const { user } = useContext(UserContext);
 
   const [tabIndex, setTabIndex] = useState(0);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate(); // Initialize useNavigate
 
@@ -40,6 +44,16 @@ const AuthRedirect = () => {
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
   };
+
+  const loginWithGoogle = async () => {
+    setError(null);
+    const provider = new GoogleAuthProvider();
+    
+    signInWithPopup(auth, provider)
+    .catch((err) => {
+      console.error(err);
+    });
+  }
 
   return (
     <div className="background">
@@ -99,7 +113,7 @@ const AuthRedirect = () => {
                   variant="contained"
                   color="primary"
                   fullWidth
-                  onClick={() => alert('Google button clicked')}
+                  onClick={() => loginWithGoogle()}
                   sx={{
                     marginTop: 2,
                     display: 'flex', // Use flex layout
