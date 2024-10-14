@@ -5,9 +5,14 @@ import {
   signInWithPopup, 
   GoogleAuthProvider
 } from 'firebase/auth';
-import './AuthPopup.css'; 
+import './Auth.css'; 
+import {
+  Button,
+  Typography,
+  TextField,
+} from '@mui/material';
 
-const AuthPopup = () => {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -42,27 +47,65 @@ const AuthPopup = () => {
   }
 
   return (
+    // <div>
+    //     <h2 className='popup-text'>Log In</h2>
+
+    //     <input 
+    //         type = "email"
+    //         placeholder = "Email..."
+    //         onChange={(e) => setEmail(e.target.value)}
+    //     />
+
+    //     <input 
+    //         type = "password"
+    //         placeholder = "Password..."
+    //         onChange={(e) => setPassword(e.target.value)}
+    //     />
+
+    //     {error && <p className='popup-text'>{error}</p>}
+
+    //     <button onClick={loginEmailAndPassword}>Log In</button>  
+    //     <button onClick={loginWithGoogle}>Log In with Google</button>     
+
+        
+    // </div>
+
     <div>
-        <h2 className='popup-text'>Log In</h2>
+      {/* Email Field */}
+      <Typography variant="body1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Email
+      </Typography>
+      <TextField
+          label="Enter email"
+          variant="outlined"
+          fullWidth
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+      />
 
-        <input 
-            type = "email"
-            placeholder = "Email..."
-            onChange={(e) => setEmail(e.target.value)}
-        />
+      {/* Password Field */}
+      <Typography variant="body1" gutterBottom sx={{ marginTop: 2, fontWeight: 'bold' }}>
+          Password
+      </Typography>
+      <TextField
+          label="Enter password"
+          variant="outlined"
+          fullWidth
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+      />
 
-        <input 
-            type = "password"
-            placeholder = "Password..."
-            onChange={(e) => setPassword(e.target.value)}
-        />
-
-        {error && <p className='popup-text'>{error}</p>}
-
-        <button onClick={loginEmailAndPassword}>Log In</button>  
-        <button onClick={loginWithGoogle}>Log In with Google</button>     
-    </div>
+      <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ marginTop: 2 }}
+          onClick={loginEmailAndPassword}
+      >
+          Log In
+      </Button>
+    </div> 
   );
 };
 
-export default AuthPopup;
+export default Login;
