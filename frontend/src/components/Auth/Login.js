@@ -95,9 +95,11 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
       />
 
+      {error && <Typography color="red" align="center" sx={{ marginTop: 2 }}>{error}</Typography>}
+
       <Button
           variant="contained"
-          color="primary"
+          
           fullWidth
           sx={{ marginTop: 2 }}
           onClick={loginEmailAndPassword}

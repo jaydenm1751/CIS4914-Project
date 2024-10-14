@@ -59,6 +59,8 @@ const ResetPassword = () => {
           onChange={(e) => setEmail(e.target.value)}
       />
 
+      {error && <Typography color="red" align="center" sx={{ marginTop: 2 }}>{error}</Typography>}
+
       <Button
           variant="contained"
           color="primary"
