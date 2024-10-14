@@ -35,7 +35,7 @@ const AuthRedirect = () => {
   useEffect(() => {
     if (user !== null) {
       console.log('User is logged in:', user);
-      navigate('/'); // Navigate to the search page
+      navigate('/'); // Navigate to the homwe page
     }
   }, [user]); // The effect will run whenever `user` changes
 
@@ -56,7 +56,17 @@ const AuthRedirect = () => {
         <CardContent>
           {/* Reset password or tabs */}
           {tabIndex === 2 ? (
-            <ResetPassword />
+              <div>
+              <ResetPassword />
+              <Button
+                  variant="text"
+                  fullWidth
+                  sx={{ fontWeight: 'bold'}}
+                  onClick={() => setTabIndex(0)}
+              >
+                  Remember your password?
+              </Button>
+          </div>
           ) : (
             <div>
               <Tabs value={tabIndex} onChange={handleTabChange} aria-label="tabs example" centered>

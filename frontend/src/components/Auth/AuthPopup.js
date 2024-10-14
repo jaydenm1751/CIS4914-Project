@@ -83,7 +83,17 @@ const AuthPopup = () => {
                                 <DialogContent>
                                 {/* Reset password or tabs */}
                                 {tabIndex === 2 ? (
-                                    <ResetPassword />
+                                    <div>
+                                        <ResetPassword />
+                                        <Button
+                                            variant="text"
+                                            fullWidth
+                                            sx={{ fontWeight: 'bold'}}
+                                            onClick={() => setTabIndex(0)}
+                                        >
+                                            Remember your password?
+                                        </Button>
+                                    </div>
                                     ) : (
                                     <div>
                                         <Tabs value={tabIndex} onChange={handleTabChange} aria-label="tabs example">
@@ -98,7 +108,7 @@ const AuthPopup = () => {
                                                     <Login/>
                                                     <Button
                                                         variant="text"
-                                                        fullwidth
+                                                        fullWidth
                                                         sx={{ fontWeight: 'bold'}}
                                                         onClick={() => setTabIndex(2)}
                                                     >
