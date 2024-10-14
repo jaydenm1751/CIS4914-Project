@@ -1,10 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { UserContext } from '../../contexts/UserContext';
 import './Messages.css';
 
-const Messaging = () => {
+const Messaging = () => {  
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  useEffect(() => {
+    if (user == null) {
+      console.log('User is not logged in. Redirecting to login...');
+      navigate('/login-redirect/'); // Navigate to the login redirect page
+    }
+  }, [user]); // The effect will run whenever `user` changes
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [inputMessage, setInputMessage] = useState('');
-
 
   const users = {
     'User 1': [
