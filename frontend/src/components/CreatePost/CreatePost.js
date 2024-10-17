@@ -10,7 +10,8 @@ const CreatePost = () => {
   const [numBedrooms, setNumBedrooms] = useState('');
   const [numBathrooms, setNumBathrooms] = useState('');
   const [sqft, setSqft] = useState('');
-  const [imageFile, setImageFile] = useState(null); // For storing the selected file
+  const [imageFiles, setImageFiles] = useState([]); // For storing the selected file
+
 
   // Address fields
   const [street, setStreet] = useState('');
@@ -26,22 +27,33 @@ const CreatePost = () => {
     zip,
   };
 
-  const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]); // Grab the first file selected
+  const handleImageUpload = (e) => {
+    if (imageFiles.length >= 7) {
+      alert("You can only upload up to 7 images.");
+      return;
+    }
+    const files = Array.from(e.target.files);
+    setImageFiles((prevFiles) => [...prevFiles, ...files]); // Append new files to the existing ones
   };
+
+  const handleDeleteImage = (index) => {
+    setImageFiles((prevFiles)=> prevFiles.filter((_, i) => i !== index));
+  };
+  
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      let imageUrl = '';
-      if (imageFile) {
-        // Upload image to Firebase Storage
-        const imageRef = ref(storage, `images/${imageFile.name}`);
-        const snapshot = await uploadBytes(imageRef, imageFile);
-        imageUrl = await getDownloadURL(snapshot.ref); // Get the download URL
+      const imageUrls = [];
+      // Upload each image
+      for (let file of imageFiles) {
+        const storageRef = ref(storage, `images/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        imageUrls.push(downloadUrl);
       }
-
       // Add sublease post to Firestore
       const subleaseData = {
         title,
@@ -50,12 +62,26 @@ const CreatePost = () => {
         numBedrooms,
         numBathrooms,
         sqft,
-        imageUrl, // Store the image URL from Firebase Storage
+        imageUrls, // Store the image URL from Firebase Storage
         address,
       };
 
       await addDoc(collection(db, 'subleases'), subleaseData);
-      console.log('Sublease added successfully!');
+      
+      // Clear the form after submission
+      setTitle('');
+      setDescription('');
+      setRent('');
+      setNumBedrooms('');
+      setNumBathrooms('');
+      setSqft('');
+      setStreet('');
+      setCity('');
+      setState('');
+      setZip('');
+      setImageFiles([]);
+      alert("Sublease created successfully!");
+
     } catch (error) {
       console.error('Error creating sublease:', error);
     }
@@ -135,8 +161,38 @@ const CreatePost = () => {
       />
 
       {/* File input */}
-      <input type="file" accept="image/*" onChange={handleImageChange} required />
+      <input type="file" accept="image/*" multiple onChange={handleImageUpload} required />
       <button type="submit">Create Post</button>
+      <div className="image-preview">
+      {imageFiles.map((file, index) => (
+        <div key={index} style={{ display: "inline-block", position: "relative" }}>
+          <img
+            src={URL.createObjectURL(file)}
+            alt="Preview"
+            style={{ width: "100px", height: "100px", marginRight: "10px" }}
+          />
+          <button
+            type="button"
+            onClick={() => handleDeleteImage(index)}
+            style={{
+              position: "absolute",
+              top: "5px",
+              right: "5px",
+              backgroundColor: "red",
+              color: "white",
+              border: "none",
+              borderRadius: "50%",
+              width: "20px",
+              height: "20px",
+              cursor: "pointer",
+            }}
+          >
+            X
+          </button>
+        </div>
+      ))}
+    </div>
+
     </form>
   );
 };
