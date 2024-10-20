@@ -10,23 +10,55 @@
   flex: 2;
 }
 
+.address-header {
+  color: #004494;
+  margin-top: 5px;
+}
+
 .right-column {
   flex: 1;
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 10px;
   border: 1px solid #ddd;
+  height: 780px;
+}
+
+.slider {
+  width: 800px;
+  position: relative;
 }
 
 .apartment-image {
   width: 100%;
-  border-radius: 10px;
+  height: 500px; /* Set a fixed height for the image */
+  object-fit: cover; /* Ensures the image covers the container */
+  border-radius: 8px; /* Add border radius for smoother edges */
 }
 
-.image-gallery img {
-  width: 20%;
-  margin-right: 10px;
-  border-radius: 5px;
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.thumbnail-slider {
+  width: 800px;
+}
+
+.thumbnail {
+  padding: 5px;
+}
+
+.thumbnail img {
+  width: 95%;
+  height: 100px;
+  object-fit: cover;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.thumbnail img:hover,
+.thumbnail img.slick-current {
+  border: 2px solid #e37a13;
 }
 
 .rent-details {
