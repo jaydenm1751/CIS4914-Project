@@ -56,6 +56,11 @@ const AuthRedirect = () => {
   }
 
   return (
+    <div class="page-wrapper">
+  
+      
+
+
     <div className="background">
       {/* Card component */}
       <Card maxWidth="sm" sx={{  margin: 'auto', padding: 3 }}>
@@ -130,6 +135,7 @@ const AuthRedirect = () => {
           )}
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 };
