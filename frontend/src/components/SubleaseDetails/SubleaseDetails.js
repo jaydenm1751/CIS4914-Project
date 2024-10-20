@@ -4,6 +4,9 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import SellIcon from '@mui/icons-material/Sell';
 import EventIcon from '@mui/icons-material/Event';
+import Slider from 'react-slick'; // Import the Slider component from react-slick
+import 'slick-carousel/slick/slick.css'; // Import the slick styles
+import 'slick-carousel/slick/slick-theme.css'; // Import the slick theme
 import './SubleaseDetails.css';
 
 const SubleaseDetails = () => {
@@ -12,6 +15,8 @@ const SubleaseDetails = () => {
   const [sublease, setSublease] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [nav1, setNav1] = useState(null);
+  const [nav2, setNav2] = useState(null);
 
   useEffect(() => {
     const fetchSublease = async () => {
@@ -47,7 +52,55 @@ const SubleaseDetails = () => {
   }
 
   // Destructure the fields
-  const { address, rent, numBedrooms, numBathrooms, sqft, imageUrl, leaseTerms, features } = sublease;
+  const { address, rent, numBedrooms, numBathrooms, sqft, imageUrls, leaseTerms, features, description } = sublease;
+
+  // Create feature list to be displayed in features section
+  const featureList = [
+    features?.hasAC && 'AC Included',
+    features?.isPetFriendly && 'Pet Friendly',
+    features?.utilitiesAreIncluded && 'Utilities Included',
+    features?.hasParking && 'Parking Available',
+    features?.isFurnished && 'Furnished',
+    features?.hasLaundry && 'Laundry Included'
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  // Settings for gallery slide feature
+  const settings = {
+    asNavFor: nav2,
+    ref: (slider) => setNav1(slider),
+    dots: false,
+    arrows: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    nextArrow: (
+      <div>
+        <div className="next-slick-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" stroke="black" height="24" viewBox="0 -960 960 960" width="24"><path d="m242-200 200-280-200-280h98l200 280-200 280h-98Zm238 0 200-280-200-280h98l200 280-200 280h-98Z"/></svg>
+        </div>
+      </div>
+    ),
+    prevArrow: (
+      <div>
+        <div className="next-slick-arrow rotate-180">
+          <svg xmlns="http://www.w3.org/2000/svg" stroke="black" height="24" viewBox="0 -960 960 960" width="24"><path d="m242-200 200-280-200-280h98l200 280-200 280h-98Zm238 0 200-280-200-280h98l200 280-200 280h-98Z"/></svg>
+        </div>
+      </div>
+    ),
+  };
+
+  // Thumbnail slider settings
+  const thumbnailSliderSettings = {
+    asNavFor: nav1,
+    ref: (slider) => setNav2(slider),
+    slidesToShow: 4,
+    swipeToSlide: true,
+    focusOnSelect: true,
+    centerMode: true,
+  };
 
   // Convert Firestore Timestamps to JS Date objects, ensuring they exist first
   const earliestMoveInDate = leaseTerms?.earliestMoveInDate?.seconds 
@@ -61,21 +114,33 @@ const SubleaseDetails = () => {
   return (
     <div className="sublease-container">
       <div className="left-column">
-        <img src={imageUrl} alt="Sublease" className="apartment-image" />
-        <h2>{`${address.street}, ${address.city}, ${address.state} ${address.zip}`}</h2>
-        <p>{address.city}, {address.state}</p>
+        <Slider {...settings} className="slider">
+          {imageUrls.map((url, index) => (
+            <div key={index}>
+              <img src={url} alt={`Image ${index + 1}`} className="apartment-image" />
+            </div>
+          ))}
+        </Slider>
+        <Slider {...thumbnailSliderSettings} className="thumbnail-slider">
+          {imageUrls.map((url, index) => (
+            <div key={index} className="thumbnail">
+              <img src={url} alt={`Thumbnail ${index + 1}`} className="thumbnail-image" />
+            </div>
+          ))}
+        </Slider>
+        <h2 className="address-header">{`${address.street}, ${address.city}, ${address.state} ${address.zip}`}</h2>
 
-        {/* Image gallery placeholder */}
-        <div className="image-gallery">
-          <img src={imageUrl} alt="Gallery Image 1" />
-          {/* Add more images if needed */}
-        </div>
-
-        <h3>The Basics</h3>
         <p><strong>Bedrooms:</strong> {numBedrooms}</p>
         <p><strong>Bathrooms:</strong> {numBathrooms}</p>
         <p><strong>Square Feet:</strong> {sqft} sqft</p>
         <p><strong>Furnished:</strong> {features?.IsFurnished ? 'Yes' : 'No'}</p>
+
+        <h2 className="address-header"> Features</h2>
+        <p>{featureList || 'No features available'}</p>
+
+        <h2 className="address-header"> Property Details</h2>
+        <p>{description}</p>
+
       </div>
 
       {/* Right Column: Rent, Move-In/Move-Out Details, and Message Form */}

@@ -42,7 +42,7 @@ const Home = () => {
                         numBedrooms={post.numBedrooms}
                         numBathrooms={post.numBathrooms}
                         sqft={post.sqft}
-                        imageUrl={post.imageUrl}
+                        imageUrl={post.imageUrls}
                     />
                 ))}
             </div>
