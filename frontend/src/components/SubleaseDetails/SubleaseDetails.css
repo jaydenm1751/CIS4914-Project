@@ -7,8 +7,14 @@
 }
 
 .left-column {
-  flex: 2;
+  flex: 2
 }
+
+
+.left-column h2, .left-column h3 {
+  text-align: left;
+}
+
 
 .address-header {
   color: #004494;
@@ -87,11 +93,15 @@
   font-size: 30px !important;
   color: #989898;
   margin-bottom: -5px;
-  margin-right: 2px;
+  margin-right: 5px;
 }
 
 .rent-text {
   font-size: 14px;
+}
+
+.bed-bath-sqft {
+  font-size: 18px;
 }
 
 .dates {
