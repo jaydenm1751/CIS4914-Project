@@ -4,10 +4,14 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import SellIcon from '@mui/icons-material/Sell';
 import EventIcon from '@mui/icons-material/Event';
+import BedIcon from '@mui/icons-material/Bed';
+import BathtubIcon from '@mui/icons-material/Bathtub';
+import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import Slider from 'react-slick'; // Import the Slider component from react-slick
 import 'slick-carousel/slick/slick.css'; // Import the slick styles
 import 'slick-carousel/slick/slick-theme.css'; // Import the slick theme
 import './SubleaseDetails.css';
+import { Chair } from '@mui/icons-material';
 
 const SubleaseDetails = () => {
   const navigate = useNavigate();
@@ -130,10 +134,18 @@ const SubleaseDetails = () => {
         </Slider>
         <h2 className="address-header">{`${address.street}, ${address.city}, ${address.state} ${address.zip}`}</h2>
 
-        <p><strong>Bedrooms:</strong> {numBedrooms}</p>
-        <p><strong>Bathrooms:</strong> {numBathrooms}</p>
-        <p><strong>Square Feet:</strong> {sqft} sqft</p>
-        <p><strong>Furnished:</strong> {features?.IsFurnished ? 'Yes' : 'No'}</p>
+        <p className="bed-bath-sqft">
+          <BedIcon className="event-icon" />
+          <strong>Bedrooms:</strong> {numBedrooms}
+        </p>
+        <p className="bed-bath-sqft">
+          <BathtubIcon className="event-icon" />
+          <strong>Bathrooms:</strong> {numBathrooms}
+        </p>
+        <p className="bed-bath-sqft">
+          <SquareFootIcon className="event-icon" />
+          <strong>Square Feet:</strong> {sqft}
+        </p>
 
         <h2 className="address-header"> Features</h2>
         <p>{featureList || 'No features available'}</p>
