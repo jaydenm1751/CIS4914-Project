@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { db, storage } from '../../config/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import './CreatePost.css'; // Import the CSS file for styles
+import { useNavigate } from 'react-router-dom';
+import './CreatePost.css';
 import backArrow from '../../assets/images/backArrow.png';
 
 const CreatePost = () => {
@@ -13,8 +13,7 @@ const CreatePost = () => {
   const [numBedrooms, setNumBedrooms] = useState('');
   const [numBathrooms, setNumBathrooms] = useState('');
   const [sqft, setSqft] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null); // State for image preview
+  const [imageFiles, setImageFiles] = useState([]); // For storing the selected files
 
   // Address fields
   const [street, setStreet] = useState('');
@@ -22,32 +21,45 @@ const CreatePost = () => {
   const [state, setState] = useState('');
   const [zip, setZip] = useState('');
 
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImageFile(file);
+  // Handle image upload and update state
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
 
-    // Create a local URL for the uploaded image
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setImagePreview(url); // Set the image preview URL
-    } else {
-      setImagePreview(null); // Clear preview if no file
+    // Filter valid image files
+    const validFiles = files.filter((file) => file.type.startsWith('image/'));
+
+    // Limit to 7 images
+    if (validFiles.length + imageFiles.length > 7) {
+      alert('You can only upload up to 7 images.');
+      return;
     }
+
+    setImageFiles((prevFiles) => [...prevFiles, ...validFiles]);
   };
 
+  // Delete an image from the preview list
+  const handleDeleteImage = (index) => {
+    setImageFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      let imageUrl = '';
-      if (imageFile) {
-        const imageRef = ref(storage, `images/${imageFile.name}`);
-        const snapshot = await uploadBytes(imageRef, imageFile);
-        imageUrl = await getDownloadURL(snapshot.ref);
+      const imageUrls = [];
+
+      // Upload each image and get the download URL
+      for (let file of imageFiles) {
+        const storageRef = ref(storage, `images/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        imageUrls.push(downloadUrl);
       }
 
+      // Prepare sublease post data
       const subleaseData = {
         title,
         description,
@@ -55,15 +67,29 @@ const CreatePost = () => {
         numBedrooms,
         numBathrooms,
         sqft,
-        imageUrl,
+        imageUrls, // Store the image URLs from Firebase Storage
         address: { street, city, state, zip },
       };
 
+      // Add sublease post to Firestore
       await addDoc(collection(db, 'subleases'), subleaseData);
-      console.log('Sublease added successfully!');
-      
-      // Navigate to homepage
-      navigate('/'); // Change to the homepage route
+
+      // Clear form after submission
+      setTitle('');
+      setDescription('');
+      setRent('');
+      setNumBedrooms('');
+      setNumBathrooms('');
+      setSqft('');
+      setStreet('');
+      setCity('');
+      setState('');
+      setZip('');
+      setImageFiles([]);
+      alert('Sublease created successfully!');
+
+      // Navigate to the homepage
+      navigate('/');
     } catch (error) {
       console.error('Error creating sublease:', error);
     }
@@ -80,6 +106,7 @@ const CreatePost = () => {
           <form onSubmit={handleSubmit} className="create-post-form">
             <h2>Create a Post</h2>
 
+            {/* Title Section */}
             <section className="form-inline">
               <div className="form-group title">
                 <label>Title</label>
@@ -93,6 +120,7 @@ const CreatePost = () => {
               </div>
             </section>
 
+            {/* Description Section */}
             <section className="form-inline">
               <div className="form-group description">
                 <label>Description</label>
@@ -105,27 +133,44 @@ const CreatePost = () => {
               </div>
             </section>
 
+            {/* Image Upload Section */}
             <section className="form-inline">
               <div className="form-group file-upload">
                 <label htmlFor="file-upload" className="file-upload-label">
-                  Choose File to Upload
+                  Upload Images
                 </label>
                 <input
                   id="file-upload"
                   type="file"
                   accept="image/*"
-                  onChange={handleImageChange}
-                  required
+                  multiple
+                  onChange={handleImageUpload}
                   style={{ display: 'none' }} // Hide the actual file input
                 />
-                {imagePreview && (
-                  <div className="image-preview">
-                    <img src={imagePreview} alt="Preview" />
-                  </div>
-                )}
               </div>
             </section>
 
+            {/* Image Preview Section */}
+            <div className="image-preview-container">
+              {imageFiles.map((file, index) => (
+                <div key={index} className="image-preview-wrapper">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt="Preview"
+                    className="image-preview"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteImage(index)}
+                    className="delete-image-button"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Rent, Bedrooms, Bathrooms, and Square Feet Section */}
             <section className="form-inline">
               <div className="form-group rent-bedroom">
                 <label>Rent</label>
@@ -172,6 +217,7 @@ const CreatePost = () => {
               </div>
             </section>
 
+            {/* Address Section */}
             <section className="form-inline">
               <div className="form-group street-city">
                 <label>Street</label>
@@ -218,7 +264,9 @@ const CreatePost = () => {
               </div>
             </section>
 
-            <button type="submit" className="submit-button">Create Post</button>
+            <button type="submit" className="submit-button">
+              Create Post
+            </button>
           </form>
         </div>
       </div>
