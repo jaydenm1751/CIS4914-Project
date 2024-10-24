@@ -1,16 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './Search.css'; 
+import MapContainer from '../MapContainer/MapContainer';
 
 const Search = () => {
+  const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
+
+  // Use the Geolocation API to get the user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error retrieving location:", error);
+          // we should show a default location if retrieval is disallowed...
+          setUserLocation({
+            lat: 29.64991,
+            lng: -82.34866,
+          });
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+      setUserLocation({
+        lat: 29.64991,
+        lng: -82.34866,
+      });
+    }
+  }, []); // Run this once when the component is mounted
+
   return (
     <div className="search-page">
       {/* Left column: Map */}
       <div className="map-container">
-        {/* Placeholder for map component */}
-        <div className="map-box">
-          <h2></h2>
-          {/*Future map API here*/}
-          <p>Google Maps will go here</p>
+         {/* Display the map with user's current location */}
+         <div className="map-box">
+          {userLocation.lat && userLocation.lng ? (
+            <MapContainer lat={userLocation.lat} lng={userLocation.lng} />
+          ) : (
+            <p>Loading your current location...</p>
+          )}
         </div>
       </div>
 

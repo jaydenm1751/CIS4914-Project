@@ -12,8 +12,10 @@ import 'slick-carousel/slick/slick.css'; // Import the slick styles
 import 'slick-carousel/slick/slick-theme.css'; // Import the slick theme
 import './SubleaseDetails.css';
 import { Chair } from '@mui/icons-material';
+import MapContainer from './../MapContainer/MapContainer';
 
 const SubleaseDetails = () => {
+
   const navigate = useNavigate();
   const { id } = useParams(); // Retrieve the ID from the URL
   const [sublease, setSublease] = useState(null);
@@ -21,6 +23,9 @@ const SubleaseDetails = () => {
   const [error, setError] = useState(null);
   const [nav1, setNav1] = useState(null);
   const [nav2, setNav2] = useState(null);
+  const [latLng, setLatLng] = useState({ lat: null, lng: null });
+
+
 
   useEffect(() => {
     const fetchSublease = async () => {
@@ -29,7 +34,17 @@ const SubleaseDetails = () => {
         const subleaseSnap = await getDoc(subleaseRef);
         
         if (subleaseSnap.exists()) {
-          setSublease(subleaseSnap.data()); // Set the sublease data if the document exists
+          const subleaseData = subleaseSnap.data();
+          setSublease(subleaseData); // Set the sublease data if the document exists
+          // If lat and lng are not in the sublease data, geocode the address
+          if (!subleaseData.address.lat || !subleaseData.address.lng) {
+            await geocodeAddress(subleaseData.address);
+          } else {
+            setLatLng({
+              lat: subleaseData.address.lat,
+              lng: subleaseData.address.lng,
+            });
+          }
         } else {
           setError('Sublease not found');
         }
@@ -43,6 +58,25 @@ const SubleaseDetails = () => {
     fetchSublease();
   }, [id]);
 
+  // Function to geocode address using Google Maps Geocoding API
+  const geocodeAddress = async (address) => {
+    const formattedAddress = `${address.street}, ${address.city}, ${address.state} ${address.zip}`;
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(formattedAddress)}&key=AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls`
+      );
+      const data = await response.json();
+      if (data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        setLatLng({ lat: location.lat, lng: location.lng });
+      } else {
+        console.error('No results found for the address.');
+      }
+    } catch (error) {
+      console.error('Error with geocoding:', error);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -54,6 +88,11 @@ const SubleaseDetails = () => {
   if (!sublease) {
     return <div>Sublease not found</div>;
   }
+
+  if (!latLng.lat || !latLng.lng) {
+    return <div>No location available for this sublease.</div>;
+  }
+  
 
   // Destructure the fields
   const { address, rent, numBedrooms, numBathrooms, sqft, imageUrls, leaseTerms, features, description } = sublease;
@@ -106,6 +145,7 @@ const SubleaseDetails = () => {
     centerMode: true,
   };
 
+
   // Convert Firestore Timestamps to JS Date objects, ensuring they exist first
   const earliestMoveInDate = leaseTerms?.earliestMoveInDate?.seconds 
   ? new Date(leaseTerms.earliestMoveInDate.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
@@ -152,7 +192,7 @@ const SubleaseDetails = () => {
 
         <h2 className="address-header"> Property Details</h2>
         <p>{description}</p>
-
+        <MapContainer lat={latLng.lat} lng={latLng.lng} />
       </div>
 
       {/* Right Column: Rent, Move-In/Move-Out Details, and Message Form */}
