@@ -24,7 +24,7 @@ function App() {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/sublease/:id" element={<SubleaseDetails />} />
           <Route path="/CreatePost" element={<CreatePost />} />
-          <Route path="/login-redirect" element={<AuthRedirect />} />
+          <Route path="/login" element={<AuthRedirect />} />
         </Routes>
       </UserContextProvider>
     </div> 

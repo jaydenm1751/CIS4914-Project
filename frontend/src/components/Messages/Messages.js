@@ -11,7 +11,7 @@ const Messaging = () => {
     if (!loading) {
         if (user == null) {
         console.log('User is not logged in. Redirecting to login...');
-        navigate('/login-redirect/'); // Navigate to the login redirect page
+        navigate('/login?redirect=/messages'); // Navigate to the login redirect page
       }
     }
   }, [user, loading]); // The effect will run whenever `user` changes

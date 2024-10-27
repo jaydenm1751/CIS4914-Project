@@ -36,40 +36,8 @@ const Login = () => {
       }
     }
   }
-  const loginWithGoogle = async () => {
-    setError(null);
-    const provider = new GoogleAuthProvider();
-    
-    signInWithPopup(auth, provider)
-    .catch((err) => {
-      console.error(err);
-    });
-  }
 
   return (
-    // <div>
-    //     <h2 className='popup-text'>Log In</h2>
-
-    //     <input 
-    //         type = "email"
-    //         placeholder = "Email..."
-    //         onChange={(e) => setEmail(e.target.value)}
-    //     />
-
-    //     <input 
-    //         type = "password"
-    //         placeholder = "Password..."
-    //         onChange={(e) => setPassword(e.target.value)}
-    //     />
-
-    //     {error && <p className='popup-text'>{error}</p>}
-
-    //     <button onClick={loginEmailAndPassword}>Log In</button>  
-    //     <button onClick={loginWithGoogle}>Log In with Google</button>     
-
-        
-    // </div>
-
     <div>
       {/* Email Field */}
       <Typography variant="body1" gutterBottom sx={{ fontWeight: 'bold' }}>

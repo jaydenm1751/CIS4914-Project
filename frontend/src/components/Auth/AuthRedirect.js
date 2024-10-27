@@ -11,6 +11,8 @@ import {
 import Login from './Login';
 import Signup from './Signup';
 import ResetPassword from './ResetPassword';
+import { db } from '../../config/firebase';
+import { getDoc, setDoc, doc } from 'firebase/firestore';
 import './Auth.css'; 
 import {
   Card,
@@ -36,7 +38,10 @@ const AuthRedirect = () => {
   useEffect(() => {
     if (user !== null) {
       console.log('User is logged in:', user);
-      navigate('/'); // Navigate to the homwe page
+
+      //Check if there is a redirect parameter otherwise go back to the home page
+      const redirectPath = new URLSearchParams(window.location.search).get('redirect');
+      navigate(redirectPath || '/');
     }
   }, [user]); // The effect will run whenever `user` changes
 
@@ -49,17 +54,46 @@ const AuthRedirect = () => {
     setError(null);
     const provider = new GoogleAuthProvider();
     
-    signInWithPopup(auth, provider)
-    .catch((err) => {
-      console.error(err);
-    });
+    try {
+      const userCredential = await signInWithPopup(auth, provider);
+
+      createUserProfile(userCredential.user);
+    } catch (err){
+      console.log(err);
+      setError("Failed to log in with Google.")
+    }
+  }
+
+  const createUserProfile = async (user) => {
+    const userProfileRef = doc(db, 'profiles', user.uid);
+  
+    try {
+      const userProfileDoc = await getDoc(userProfileRef);
+
+      // Only create profile if it doesn’t already exist
+      if (!userProfileDoc.exists()) {
+        const username = user.email.split('@')[0]; // Extract username from email
+        await setDoc(userProfileRef, {
+          uid: user.uid,
+          username: username,
+          email: user.email,
+          createdAt: new Date(),
+        });
+        console.log('Profile with Google created: ', username)
+      } else {
+        console.log('Profile already exists: ', userProfileDoc)
+      }
+    } catch (err) {
+      console.log('error fetching or creating profile', err)
+    }
+  };
+
+  const goHome = () => {
+    navigate('/');
   }
 
   return (
     <div class="page-wrapper">
-  
-      
-
 
     <div className="background">
       {/* Card component */}
@@ -68,6 +102,9 @@ const AuthRedirect = () => {
           title="Welcome to Subleaser"
           titleTypographyProps={{ variant: 'h4', align: 'center', sx: { fontWeight: 'bold' } }}
         />
+        <Typography className="blue-text" align='center' onClick={goHome}>
+          Return Home
+        </Typography>
 
         <CardContent>
           {/* Reset password or tabs */}
