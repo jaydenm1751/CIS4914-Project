@@ -1,8 +1,19 @@
 import { React, useState } from 'react';
-import './Auth.css';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import Login from './Login';
 import Signup from './Signup';
 import ResetPassword from './ResetPassword';
+import './Auth.css';
+
+export const logout = async () => {
+  try{
+  console.log("logging out user")
+  await signOut(auth);
+  } catch (error) {
+  console.error("Error during sign-out:", error);
+  }
+};
 
 const Auth = () => {
   const [activeScreen, setActiveScreen] = useState(1); // 1==Login, 2==Sign Up, 3==Reset Password

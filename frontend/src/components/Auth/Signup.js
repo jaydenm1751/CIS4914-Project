@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { auth } from '../../config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { db } from '../../config/firebase';
+import { getDoc, setDoc, doc } from 'firebase/firestore';
 import './Auth.css';
 import {
   Button,
@@ -16,7 +18,9 @@ const Signup = () => {
   const registerEmailAndPassword = async () => {
     try {
       setError(null); // Reset error state before attempt
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      createUserProfile(userCredential.user);
     } catch (err) {
       console.error(err);
       
@@ -33,26 +37,31 @@ const Signup = () => {
     }
   }
 
+  const createUserProfile = async (user) => {
+    const userProfileRef = doc(db, 'profiles', user.uid);
+  
+    try {
+      const userProfileDoc = await getDoc(userProfileRef);
+
+      if (!userProfileDoc.exists()) {
+        const username = user.email.split('@')[0]; // Extract username from email
+        await setDoc(userProfileRef, {
+          uid: user.uid,
+          username: username,
+          email: user.email,
+          createdOn: new Date(),
+        });
+        console.log('Profile with Google created: ', username)
+      } else {
+        console.log('Profile already exists: ', userProfileDoc)
+      }
+    } catch (err) {
+      console.log('error fetching or creating profile', err)
+    }
+    console.log("Creating profile");
+  };
+
   return (
-    // <div>
-    //     <h2 className='popup-text'>Sign Up</h2>
-
-    //     <input 
-    //         type = "email"
-    //         placeholder = "Email..."
-    //         onChange={(e) => setEmail(e.target.value)}
-    //     />
-    //     <input 
-    //         type = "password"
-    //         placeholder = "Password..."
-    //         onChange={(e) => setPassword(e.target.value)}
-    //     />
-
-    //     {error && <p className='popup-text'>{error}</p>}
-              
-    //     <button onClick={registerEmailAndPassword}>Sign Up</button>
-    // </div>
-
     <div>
       {/* Email Field */}
       <Typography variant="body1" gutterBottom sx={{ fontWeight: 'bold' }}>

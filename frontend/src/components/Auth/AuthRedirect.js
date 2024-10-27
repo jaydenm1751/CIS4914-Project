@@ -11,6 +11,8 @@ import {
 import Login from './Login';
 import Signup from './Signup';
 import ResetPassword from './ResetPassword';
+import { db } from '../../config/firebase';
+import { getDoc, setDoc, doc } from 'firebase/firestore';
 import './Auth.css'; 
 import {
   Card,
@@ -35,12 +37,13 @@ const AuthRedirect = () => {
 
   useEffect(() => {
     if (user !== null) {
-      console.log('User is logged in:', user);
-      navigate('/'); // Navigate to the homwe page
-    }
-  }, [user]); // The effect will run whenever `user` changes
+      console.log('User is logged in.');
 
-  // Function to handle tab change
+      const redirectPath = new URLSearchParams(window.location.search).get('redirect');
+      navigate(redirectPath || '/');
+    }
+  }, [user]); 
+
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
   };
@@ -49,28 +52,30 @@ const AuthRedirect = () => {
     setError(null);
     const provider = new GoogleAuthProvider();
     
-    signInWithPopup(auth, provider)
-    .catch((err) => {
-      console.error(err);
-    });
+    try {
+      const userCredential = await signInWithPopup(auth, provider);
+    } catch (err){
+      console.log(err);
+      setError("Failed to log in with Google.")
+    }
+  }
+
+  const goHome = () => {
+    navigate('/');
   }
 
   return (
-    <div class="page-wrapper">
-  
-      
-
-
     <div className="background">
-      {/* Card component */}
-      <Card maxWidth="sm" sx={{  margin: 'auto', padding: 3 }}>
+      <Card sx={{  margin: 'auto', padding: 3 }}>
         <CardHeader
           title="Welcome to Subleaser"
           titleTypographyProps={{ variant: 'h4', align: 'center', sx: { fontWeight: 'bold' } }}
         />
+        <Typography className="blue-text" align='center' onClick={goHome}>
+          Return Home
+        </Typography>
 
         <CardContent>
-          {/* Reset password or tabs */}
           {tabIndex === 2 ? (
               <div>
               <ResetPassword />
@@ -90,7 +95,6 @@ const AuthRedirect = () => {
                 <Tab label="Sign Up" />
               </Tabs>
 
-              {/* Tab Content */}
               <Box sx={{ padding: 2 }}>
                 {tabIndex === 0 && (
                   <div>
@@ -107,13 +111,12 @@ const AuthRedirect = () => {
                 )}
                 {tabIndex === 1 && <Signup />}
 
-                <Divider sx={{ margin: '16px 0' }} /> {/* Divider */}
+                <Divider sx={{ margin: '16px 0' }} />
 
                 <Typography variant="body1" align="center">
                   Or connect with:
                 </Typography>
 
-                {/* Google Button */}
                 <Button
                   variant="contained"
                   color="primary"
@@ -126,7 +129,6 @@ const AuthRedirect = () => {
                     alignItems: 'center', // Center content vertically
                   }}
                 >
-                  {/* Google logo inside the button */}
                   <GoogleLogo style={{ marginRight: 8, width: '24px', height: '24px' }} />
                   Connect with Google
                 </Button>
@@ -135,7 +137,6 @@ const AuthRedirect = () => {
           )}
         </CardContent>
       </Card>
-    </div>
     </div>
   );
 };
