@@ -37,15 +37,13 @@ const AuthRedirect = () => {
 
   useEffect(() => {
     if (user !== null) {
-      console.log('User is logged in:', user);
+      console.log('User is logged in.');
 
-      //Check if there is a redirect parameter otherwise go back to the home page
       const redirectPath = new URLSearchParams(window.location.search).get('redirect');
       navigate(redirectPath || '/');
     }
-  }, [user]); // The effect will run whenever `user` changes
+  }, [user]); 
 
-  // Function to handle tab change
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
   };
@@ -56,48 +54,19 @@ const AuthRedirect = () => {
     
     try {
       const userCredential = await signInWithPopup(auth, provider);
-
-      createUserProfile(userCredential.user);
     } catch (err){
       console.log(err);
       setError("Failed to log in with Google.")
     }
   }
 
-  const createUserProfile = async (user) => {
-    const userProfileRef = doc(db, 'profiles', user.uid);
-  
-    try {
-      const userProfileDoc = await getDoc(userProfileRef);
-
-      // Only create profile if it doesn’t already exist
-      if (!userProfileDoc.exists()) {
-        const username = user.email.split('@')[0]; // Extract username from email
-        await setDoc(userProfileRef, {
-          uid: user.uid,
-          username: username,
-          email: user.email,
-          createdAt: new Date(),
-        });
-        console.log('Profile with Google created: ', username)
-      } else {
-        console.log('Profile already exists: ', userProfileDoc)
-      }
-    } catch (err) {
-      console.log('error fetching or creating profile', err)
-    }
-  };
-
   const goHome = () => {
     navigate('/');
   }
 
   return (
-    <div class="page-wrapper">
-
     <div className="background">
-      {/* Card component */}
-      <Card maxWidth="sm" sx={{  margin: 'auto', padding: 3 }}>
+      <Card sx={{  margin: 'auto', padding: 3 }}>
         <CardHeader
           title="Welcome to Subleaser"
           titleTypographyProps={{ variant: 'h4', align: 'center', sx: { fontWeight: 'bold' } }}
@@ -107,7 +76,6 @@ const AuthRedirect = () => {
         </Typography>
 
         <CardContent>
-          {/* Reset password or tabs */}
           {tabIndex === 2 ? (
               <div>
               <ResetPassword />
@@ -127,7 +95,6 @@ const AuthRedirect = () => {
                 <Tab label="Sign Up" />
               </Tabs>
 
-              {/* Tab Content */}
               <Box sx={{ padding: 2 }}>
                 {tabIndex === 0 && (
                   <div>
@@ -144,13 +111,12 @@ const AuthRedirect = () => {
                 )}
                 {tabIndex === 1 && <Signup />}
 
-                <Divider sx={{ margin: '16px 0' }} /> {/* Divider */}
+                <Divider sx={{ margin: '16px 0' }} />
 
                 <Typography variant="body1" align="center">
                   Or connect with:
                 </Typography>
 
-                {/* Google Button */}
                 <Button
                   variant="contained"
                   color="primary"
@@ -163,7 +129,6 @@ const AuthRedirect = () => {
                     alignItems: 'center', // Center content vertically
                   }}
                 >
-                  {/* Google logo inside the button */}
                   <GoogleLogo style={{ marginRight: 8, width: '24px', height: '24px' }} />
                   Connect with Google
                 </Button>
@@ -172,7 +137,6 @@ const AuthRedirect = () => {
           )}
         </CardContent>
       </Card>
-    </div>
     </div>
   );
 };

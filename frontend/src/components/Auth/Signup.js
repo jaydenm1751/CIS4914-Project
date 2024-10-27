@@ -43,14 +43,13 @@ const Signup = () => {
     try {
       const userProfileDoc = await getDoc(userProfileRef);
 
-    // Only create profile if it doesn’t already exist
       if (!userProfileDoc.exists()) {
         const username = user.email.split('@')[0]; // Extract username from email
         await setDoc(userProfileRef, {
           uid: user.uid,
           username: username,
           email: user.email,
-          createdAt: new Date(),
+          createdOn: new Date(),
         });
         console.log('Profile with Google created: ', username)
       } else {
