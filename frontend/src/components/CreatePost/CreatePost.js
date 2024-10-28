@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../../contexts/UserContext';
 import { db, storage } from '../../config/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -14,6 +15,7 @@ const CreatePost = () => {
   const [numBathrooms, setNumBathrooms] = useState('');
   const [sqft, setSqft] = useState('');
   const [imageFiles, setImageFiles] = useState([]); // For storing the selected files
+  const { user, loading } = useContext(UserContext);
 
   // Address fields
   const [street, setStreet] = useState('');
@@ -22,6 +24,15 @@ const CreatePost = () => {
   const [zip, setZip] = useState('');
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading) {
+        if (user == null) {
+        console.log('User is not logged in. Redirecting to login...');
+        navigate('/login-redirect/'); // Navigate to the login redirect page
+      }
+    }
+  }, [user, loading]);
 
   // Handle image upload and update state
   const handleImageUpload = (e) => {
@@ -69,6 +80,7 @@ const CreatePost = () => {
         sqft,
         imageUrls, // Store the image URLs from Firebase Storage
         address: { street, city, state, zip },
+        userID: user.uid
       };
 
       // Add sublease post to Firestore

@@ -1,74 +1,140 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
+import { db } from '../../config/firebase';
+import { collection, addDoc, query, where, getDocs, doc, setDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import './Messages.css';
 
 const Messaging = () => {  
   const { user, loading } = useContext(UserContext);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading) {
-        if (user == null) {
+      if (!user) {
         console.log('User is not logged in. Redirecting to login...');
-        navigate('/login?redirect=/messages'); // Navigate to the login redirect page
+        navigate('/login?redirect=/messages');
+      } else {
+        console.log('User is logged in: ', user );
       }
     }
-  }, [user, loading]); // The effect will run whenever `user` changes
+  }, [user, loading, navigate]);
 
   const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-
-  const users = {
-    'User 1': [
-      { text: 'Testing received message', type: 'received' },
-      { text: 'Testing sent message', type: 'sent' },
-    ],
-    'User 2': [
-      { text: 'Testing user2 message', type: 'received' },
-      { text: 'Testing user2 sent message', type: 'sent' },
-    ],
-    'User 3': [
-      { text: 'User3 message', type: 'received' },
-    ],
-  };
-
+  const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  const handleUserClick = (user) => {
-    setSelectedUser(user);
-    setMessages(users[user] || []); 
+  // Fetch other users from Firestore
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersRef = collection(db, 'users');
+        const querySnapshot = await getDocs(usersRef);
+        
+        const fetchedUsers = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(fetchedUser => fetchedUser.id !== user.uid);
+
+        console.log('Fetched users:', fetchedUsers);
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Error fetching users: ", error);
+      }
+    };
+
+    if (user) {
+      fetchUsers();
+    }
+  }, [user]);
+
+  // Function to get or create a conversation
+  const handleUserClick = async (otherUser) => {
+    setSelectedUser(otherUser);
+    setMessages([]); // Clear messages when a new user is selected
+
+    console.log('Selected user:', otherUser);
+
+    const conversationQuery = query(
+      collection(db, 'conversations'),
+      where('users', 'array-contains', user.uid)
+    );
+
+    const conversationSnapshot = await getDocs(conversationQuery);
+    let existingConversation = null;
+
+    conversationSnapshot.forEach(docSnapshot => {
+      const conversationData = docSnapshot.data();
+      console.log('Checking conversation data:', conversationData);
+      if (conversationData.users.includes(otherUser.id)) {
+        existingConversation = { id: docSnapshot.id, ...conversationData };
+      }
+    });
+
+    if (existingConversation) {
+      console.log('Existing conversation found:', existingConversation);
+      setConversationId(existingConversation.id);
+
+      // Set up a real-time listener for messages
+      const messagesRef = collection(db, 'conversations', existingConversation.id, 'messages');
+      const messagesQuery = query(messagesRef, orderBy('timestamp')); // Order messages by timestamp
+      onSnapshot(messagesQuery, (snapshot) => {
+        const loadedMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('Loaded messages:', loadedMessages);
+        setMessages(loadedMessages);
+      });
+    } else {
+      // Conversation does not exist, create a new one
+      const newConversationRef = doc(collection(db, 'conversations'));
+      console.log('No conversation found, creating a new one.');
+      await setDoc(newConversationRef, {
+        users: [user.uid, otherUser.id],
+      });
+      setConversationId(newConversationRef.id);
+    }
   };
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim() !== '') {
-      setMessages([...messages, { text: inputMessage, type: 'sent' }]);
-      setInputMessage(''); 
-    }
+  // Send a message
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() === '' || !conversationId) return;
+
+    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+    await addDoc(messagesRef, {
+      text: inputMessage,
+      senderId: user.uid,
+      timestamp: new Date(),
+    });
+
+    setInputMessage('');
   };
 
   return (
     <div className="messaging-container">
       <div className="user-list">
         <h2>Users</h2>
-        {Object.keys(users).map((user, index) => (
-          <div
-            key={index}
-            className="user-item"
-            onClick={() => handleUserClick(user)}
-          >
-            {user}
-          </div>
-        ))}
+        {users.length > 0 ? (
+          users.map((otherUser, index) => (
+            <div
+              key={index}
+              className="user-item"
+              onClick={() => handleUserClick(otherUser)}
+            >
+              {otherUser.displayName || 'Unknown User'}
+            </div>
+          ))
+        ) : (
+          <p>No other users found.</p>
+        )}
       </div>
 
       <div className="messages-container">
         <div className="messages">
-          <h2>{selectedUser ? `Messages with ${selectedUser}` : 'Select a user'}</h2>
+          <h2>{selectedUser ? `Messages with ${selectedUser.displayName}` : 'Select a user'}</h2>
           {messages.length > 0 ? (
             messages.map((msg, index) => (
-              <div key={index} className={`message ${msg.type}`}>
-                {msg.type === 'received' ? selectedUser : 'You'}: {msg.text}
+              <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
+                {msg.text}
               </div>
             ))
           ) : (
