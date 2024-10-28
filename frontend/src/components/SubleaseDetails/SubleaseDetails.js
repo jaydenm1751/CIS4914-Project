@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../../contexts/UserContext';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+// import { doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, query, where, doc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import SellIcon from '@mui/icons-material/Sell';
 import EventIcon from '@mui/icons-material/Event';
@@ -24,7 +26,8 @@ const SubleaseDetails = () => {
   const [nav1, setNav1] = useState(null);
   const [nav2, setNav2] = useState(null);
   const [latLng, setLatLng] = useState({ lat: null, lng: null });
-
+  const [inputMessage, setInputMessage] = useState('');
+  const { user } = useContext(UserContext);
 
 
   useEffect(() => {
@@ -95,7 +98,7 @@ const SubleaseDetails = () => {
   
 
   // Destructure the fields
-  const { address, rent, numBedrooms, numBathrooms, sqft, imageUrls, leaseTerms, features, description } = sublease;
+  const { address, rent, numBedrooms, numBathrooms, sqft, imageUrls, leaseTerms, features, description, userID } = sublease;
 
   // Create feature list to be displayed in features section
   const featureList = [
@@ -134,6 +137,61 @@ const SubleaseDetails = () => {
       </div>
     ),
   };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+
+    console.log("Current user:", user); 
+    console.log("Current user ID:", user?.uid); 
+    console.log("Sublease data:", sublease);
+    console.log("Sublease owner ID:", sublease?.userID);
+
+    // Explicitly check for null or undefined for both user and sublease.userId
+    if (user?.uid == null || sublease?.userID == null) {
+      console.error("User or sublease owner ID is missing.");
+      return;
+    }
+
+    if (inputMessage.trim() === '') {
+      console.error("Message content is empty.");
+      return;
+    }
+
+    if (inputMessage.trim() === '') return;
+  
+    try {
+      const senderID = user.uid;
+      const receiverID = sublease.userID; // Assuming `sublease` contains userId of the post owner
+      const conversationId= [senderID, receiverID].sort().join('_'); // Unique ID for conversation
+  
+      const conversationRef = doc(db, 'conversations', conversationId);
+      const messageData = {
+        text: inputMessage,
+        senderID,
+        receiverID,
+        timestamp: new Date(),
+      };
+  
+      // Check if conversation exists, if not, create it
+      const conversationDoc = await getDoc(conversationRef);
+      if (!conversationDoc.exists()) {
+        await setDoc(conversationRef, {
+          participants: [senderID, receiverID],
+          messages: [messageData],
+        });
+      } else {
+        await updateDoc(conversationRef, {
+          messages: arrayUnion(messageData),
+        });
+      }
+  
+      setInputMessage(''); // Clear the input
+      alert('Message sent successfully!');
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+  
 
   // Thumbnail slider settings
   const thumbnailSliderSettings = {
@@ -220,17 +278,30 @@ const SubleaseDetails = () => {
             <p className="send-a-message">Send a Message</p>
             <p className="to-landlord">To the Landlord who Posted this Listing</p>
           </div>
-          <form>
+          <form onSubmit={handleSendMessage}>
             <label htmlFor="subject"><strong>Subject:</strong></label>
-            <input type="text" id="subject" name="subject" value={`${address.street}, ${address.city}`} readOnly />
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              value={`${address.street}, ${address.city}`}
+              readOnly
+            />
 
             <label htmlFor="message"><strong>Message:</strong></label>
-            <textarea id="message" name="message" placeholder="Your Message"></textarea>
+            <textarea
+              id="message"
+              name="message"
+              placeholder="Your Message"
+              value={inputMessage} // Bind to `inputMessage` state
+              onChange={(e) => setInputMessage(e.target.value)} // Update `inputMessage` on change
+            />
 
             <div className="button-container">
               <button type="submit">Send Message</button>
             </div>
           </form>
+
           <p className="conversation-notice">
             All your conversations can be seen in <span className="messages-link" onClick={() => navigate('/messages')}>Messages</span>
           </p>
