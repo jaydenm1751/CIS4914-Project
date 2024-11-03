@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { db } from '../../config/firebase';
-import { collection, addDoc, query, where, getDocs, doc, setDoc, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import './Messages.css';
 
 const Messaging = () => {  
@@ -11,14 +11,12 @@ const Messaging = () => {
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
+      if (user == null) {
         console.log('User is not logged in. Redirecting to login...');
         navigate('/login?redirect=/messages');
-      } else {
-        console.log('User is logged in: ', user );
       }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading]);
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
@@ -26,19 +24,18 @@ const Messaging = () => {
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  // Fetch other users from Firestore
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const usersRef = collection(db, 'users');
-        const querySnapshot = await getDocs(usersRef);
+        const profilesRef = collection(db, 'profiles');
+        const querySnapshot = await getDocs(profilesRef);
         
         const fetchedUsers = querySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() }))
           .filter(fetchedUser => fetchedUser.id !== user.uid);
 
-        console.log('Fetched users:', fetchedUsers);
         setUsers(fetchedUsers);
+        console.log('Fetched users:', fetchedUsers);
       } catch (error) {
         console.error("Error fetching users: ", error);
       }
@@ -49,53 +46,46 @@ const Messaging = () => {
     }
   }, [user]);
 
-  // Function to get or create a conversation
   const handleUserClick = async (otherUser) => {
     setSelectedUser(otherUser);
     setMessages([]); // Clear messages when a new user is selected
-
-    console.log('Selected user:', otherUser);
-
+  
+    // Query to find existing conversation
     const conversationQuery = query(
       collection(db, 'conversations'),
-      where('users', 'array-contains', user.uid)
+      where('participants', 'array-contains', user.uid)
     );
-
+  
     const conversationSnapshot = await getDocs(conversationQuery);
     let existingConversation = null;
-
+  
     conversationSnapshot.forEach(docSnapshot => {
       const conversationData = docSnapshot.data();
-      console.log('Checking conversation data:', conversationData);
-      if (conversationData.users.includes(otherUser.id)) {
+      if (conversationData.participants.includes(otherUser.id)) {
         existingConversation = { id: docSnapshot.id, ...conversationData };
       }
     });
-
+  
     if (existingConversation) {
-      console.log('Existing conversation found:', existingConversation);
+      // Conversation exists
       setConversationId(existingConversation.id);
-
-      // Set up a real-time listener for messages
-      const messagesRef = collection(db, 'conversations', existingConversation.id, 'messages');
-      const messagesQuery = query(messagesRef, orderBy('timestamp')); // Order messages by timestamp
-      onSnapshot(messagesQuery, (snapshot) => {
-        const loadedMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log('Loaded messages:', loadedMessages);
-        setMessages(loadedMessages);
-      });
+  
+      // Access the `messages` map directly
+      const loadedMessages = existingConversation.messages ? Object.values(existingConversation.messages) : [];
+      console.log("Loaded messages:", loadedMessages); // Debugging line
+      setMessages(loadedMessages);
     } else {
       // Conversation does not exist, create a new one
       const newConversationRef = doc(collection(db, 'conversations'));
-      console.log('No conversation found, creating a new one.');
       await setDoc(newConversationRef, {
-        users: [user.uid, otherUser.id],
+        participants: [user.uid, otherUser.id],
+        messages: {} // Initialize messages as an empty object
       });
       setConversationId(newConversationRef.id);
     }
   };
+  
 
-  // Send a message
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '' || !conversationId) return;
 
@@ -120,7 +110,7 @@ const Messaging = () => {
               className="user-item"
               onClick={() => handleUserClick(otherUser)}
             >
-              {otherUser.displayName || 'Unknown User'}
+              {otherUser.displayName || `${otherUser.firstName} ${otherUser.lastName}` || 'Unknown User'}
             </div>
           ))
         ) : (
@@ -129,18 +119,18 @@ const Messaging = () => {
       </div>
 
       <div className="messages-container">
-        <div className="messages">
-          <h2>{selectedUser ? `Messages with ${selectedUser.displayName}` : 'Select a user'}</h2>
-          {messages.length > 0 ? (
-            messages.map((msg, index) => (
-              <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
-                {msg.text}
-              </div>
-            ))
-          ) : (
-            <div>No messages yet.</div>
-          )}
-        </div>
+      <div className="messages">
+        <h2>{selectedUser ? `Messages with ${selectedUser.displayName || selectedUser.firstName}` : 'Select a user'}</h2>
+        {messages.length > 0 ? (
+          messages.map((msg, index) => (
+            <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
+              <span>{msg.senderId === user.uid ? 'You' : selectedUser.displayName || selectedUser.firstName}:</span> {msg.text}
+            </div>
+          ))
+        ) : (
+          <div>No messages yet.</div>
+        )}
+      </div>
 
         <div className="send-message">
           <input
