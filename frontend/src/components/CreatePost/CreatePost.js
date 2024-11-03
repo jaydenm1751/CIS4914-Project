@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import './CreatePost.css';
 import backArrow from '../../assets/images/backArrow.png';
 
+const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls'; // Replace with your Google API key
+
 const CreatePost = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -14,9 +16,9 @@ const CreatePost = () => {
   const [numBedrooms, setNumBedrooms] = useState('');
   const [numBathrooms, setNumBathrooms] = useState('');
   const [sqft, setSqft] = useState('');
-  const [imageFiles, setImageFiles] = useState([]); // For storing the selected files
+  const [imageFiles, setImageFiles] = useState([]);
   const { user, loading } = useContext(UserContext);
-
+  
   // Address fields
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
@@ -26,43 +28,60 @@ const CreatePost = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) {
-        if (user == null) {
-        console.log('User is not logged in. Redirecting to login...');
-        navigate('/login-redirect/'); // Navigate to the login redirect page
-      }
+    if (!loading && user == null) {
+      console.log('User is not logged in. Redirecting to login...');
+      navigate('/login-redirect/');
     }
   }, [user, loading]);
 
-  // Handle image upload and update state
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-
-    // Filter valid image files
     const validFiles = files.filter((file) => file.type.startsWith('image/'));
-
-    // Limit to 7 images
     if (validFiles.length + imageFiles.length > 7) {
       alert('You can only upload up to 7 images.');
       return;
     }
-
     setImageFiles((prevFiles) => [...prevFiles, ...validFiles]);
   };
 
-  // Delete an image from the preview list
   const handleDeleteImage = (index) => {
     setImageFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const validateAddress = async () => {
+    if (!street || !city || !state || !zip) {
+      alert("Please complete all address fields.");
+      return false;
+    }
+
+    const fullAddress = `${street}, ${city}, ${state} ${zip}`;
+    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${GOOGLE_API_KEY}`;
 
     try {
-      const imageUrls = [];
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      if (data.status === "OK" && data.results.length > 0) {
+        return true; // Address is valid
+      } else {
+        alert("Please enter a valid address.");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error validating address:", error);
+      alert("An error occurred while validating the address. Please try again.");
+      return false;
+    }
+  };
 
-      // Upload each image and get the download URL
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!await validateAddress()) {
+      return; // Stop submission if the address is invalid
+    }
+    
+    try {
+      const imageUrls = [];
       for (let file of imageFiles) {
         const storageRef = ref(storage, `images/${file.name}`);
         const snapshot = await uploadBytes(storageRef, file);
@@ -70,7 +89,6 @@ const CreatePost = () => {
         imageUrls.push(downloadUrl);
       }
 
-      // Prepare sublease post data
       const subleaseData = {
         title,
         description,
@@ -78,12 +96,11 @@ const CreatePost = () => {
         numBedrooms,
         numBathrooms,
         sqft,
-        imageUrls, // Store the image URLs from Firebase Storage
+        imageUrls,
         address: { street, city, state, zip },
         userID: user.uid
       };
 
-      // Add sublease post to Firestore
       await addDoc(collection(db, 'subleases'), subleaseData);
 
       // Clear form after submission
@@ -100,7 +117,6 @@ const CreatePost = () => {
       setImageFiles([]);
       alert('Sublease created successfully!');
 
-      // Navigate to the homepage
       navigate('/');
     } catch (error) {
       console.error('Error creating sublease:', error);
@@ -118,7 +134,6 @@ const CreatePost = () => {
           <form onSubmit={handleSubmit} className="create-post-form">
             <h2>Create a Post</h2>
 
-            {/* Title Section */}
             <section className="form-inline">
               <div className="form-group title">
                 <label>Title</label>
@@ -132,7 +147,6 @@ const CreatePost = () => {
               </div>
             </section>
 
-            {/* Description Section */}
             <section className="form-inline">
               <div className="form-group description">
                 <label>Description</label>
@@ -145,7 +159,6 @@ const CreatePost = () => {
               </div>
             </section>
 
-            {/* Image Upload Section */}
             <section className="form-inline">
               <div className="form-group file-upload">
                 <label htmlFor="file-upload" className="file-upload-label">
@@ -157,12 +170,11 @@ const CreatePost = () => {
                   accept="image/*"
                   multiple
                   onChange={handleImageUpload}
-                  style={{ display: 'none' }} // Hide the actual file input
+                  style={{ display: 'none' }}
                 />
               </div>
             </section>
 
-            {/* Image Preview Section */}
             <div className="image-preview-container">
               {imageFiles.map((file, index) => (
                 <div key={index} className="image-preview-wrapper">
@@ -182,7 +194,6 @@ const CreatePost = () => {
               ))}
             </div>
 
-            {/* Rent, Bedrooms, Bathrooms, and Square Feet Section */}
             <section className="form-inline">
               <div className="form-group rent-bedroom">
                 <label>Rent</label>
@@ -229,7 +240,6 @@ const CreatePost = () => {
               </div>
             </section>
 
-            {/* Address Section */}
             <section className="form-inline">
               <div className="form-group street-city">
                 <label>Street</label>
@@ -265,10 +275,10 @@ const CreatePost = () => {
                 />
               </div>
               <div className="form-group state-zip">
-                <label>ZIP</label>
+                <label>Zip</label>
                 <input
                   type="text"
-                  placeholder="ZIP"
+                  placeholder="Zip"
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
                   required
