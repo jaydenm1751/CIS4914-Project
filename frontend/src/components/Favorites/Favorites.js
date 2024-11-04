@@ -1,48 +1,54 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
-import './Favorites.css'; 
-import SubleasePost from '../Home/SubleasePost'; 
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../config/firebase'; // Assuming you have Firebase config set up
+import './Favorites.css';
+import SubleasePost from '../Home/SubleasePost';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 const Favorites = () => {
   const { user, loading } = useContext(UserContext);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+  const [favoriteListings, setFavoriteListings] = useState([]);
+
 
   useEffect(() => {
-    if (!loading) {
-        if (user == null) {
-        console.log('User is not logged in. Redirecting to login...');
-        navigate('/login?redirect=/favorites'); // Navigate to the login redirect page
-      }
+    if (!loading && !user) {
+      console.log('User is not logged in. Redirecting to login...');
+      navigate('/login?redirect=/favorites');
     }
-  }, [user, loading]); // The effect will run whenever `user` changes
+  }, [user, loading, navigate]);
 
-  const [favoriteListings, setFavoriteListings] = useState([]);
 
   useEffect(() => {
     const fetchFavoriteListings = async () => {
-      try {
-        // Fetch sublease posts from Firestore (assumed to be the 'subleases' collection)
-        const querySnapshot = await getDocs(collection(db, 'subleases'));
-        const allSubleases = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+      if (user) {
+        try {
+          const userId = user.uid;
+          const favoritesRef = collection(db, `users/${userId}/favorites`);
+          const favoritesSnapshot = await getDocs(favoritesRef);
+          
 
-        // Filter favorite listings - assuming favorite IDs are managed and stored
-        const favoriteIDs = ['DFKmLzV5WFosN96kLOb9', 'anotherFavoriteID']; // Replace this with dynamic favorite management logic
-        const favorites = allSubleases.filter(sublease => favoriteIDs.includes(sublease.id));
+          const favoriteIDs = favoritesSnapshot.docs.map((doc) => doc.id);
+          
+    
+          const subleasesSnapshot = await getDocs(collection(db, 'subleases'));
+          const allSubleases = subleasesSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
-        setFavoriteListings(favorites);
-      } catch (error) {
-        console.error('Error fetching favorite listings: ', error);
+
+          const favorites = allSubleases.filter((sublease) => favoriteIDs.includes(sublease.id));
+          setFavoriteListings(favorites);
+        } catch (error) {
+          console.error('Error fetching favorite listings: ', error);
+        }
       }
     };
 
     fetchFavoriteListings();
-  }, []);
+  }, [user]);
 
   return (
     <div className="favorites-container">
@@ -58,7 +64,8 @@ const Favorites = () => {
               numBedrooms={post.numBedrooms}
               numBathrooms={post.numBathrooms}
               sqft={post.sqft}
-              imageUrl={post.imageUrl}
+              imageUrl={post.imageUrls[0]} 
+
             />
           ))
         ) : (
