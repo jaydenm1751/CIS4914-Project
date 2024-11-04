@@ -7,16 +7,11 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage
 import { deleteUser } from 'firebase/auth';
 import { 
   Box, 
-  Container, 
+  Paper,
   Grid, 
   Avatar, 
   Typography, 
   Divider, 
-  TextField, 
-  FormControl, 
-  InputLabel, 
-  Select, 
-  MenuItem, 
   Button } from '@mui/material';
 import './Profile.css'; 
 import profilePicture from '../../assets/images/profilePicture.jpg';
@@ -25,12 +20,13 @@ const Profile = () => {
   const { user, loading } = useContext(UserContext);
   const navigate = useNavigate(); 
 
+  const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState("");
+  const [userType, setUserType] = useState('Role Not Selected');
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("");
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [bio, setBio] = useState("");
@@ -41,7 +37,6 @@ const Profile = () => {
   const handleLastNameChange = (event) => setLastName(event.target.value);
   const handleEmailChange = (event) => setEmail(event.target.value);
   const handlePhoneChange = (event) => setPhone(event.target.value);
-  const handleRoleChange = (event) => setRole(event.target.value);
   const handleStateChange = (event) => setState(event.target.value);
   const handleCityChange = (event) => setCity(event.target.value);
   const handleBioChange = (event) => setBio(event.target.value);
@@ -70,10 +65,10 @@ const Profile = () => {
         const profileData = docSnap.data();
 
         setUsername(profileData.username || '');
+        setUserType(profileData.userType || '');
         setFirstName(profileData.firstName || '');
         setLastName(profileData.lastName || '');
         setEmail(profileData.email || '');
-        setRole(profileData.role || '');
         setPhone(profileData.phone || '');
         setState(profileData.state || '');
         setCity(profileData.city || '');
@@ -136,12 +131,19 @@ const Profile = () => {
   if (loading || profileLoading) return <p>Loading profile...</p>
   if (error) return <p>{error}</p>
 
-  const handleUpdateProfile = async() => {
+  const handleEditClick = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const handleSaveClick = async() => {
+    setIsEditing(!isEditing);
+
     const newData = {
+      username: username,
       firstName: firstName,
       lastName: lastName,
       email: email,
-      role: role,
+      userType: userType,
       phone: phone,
       state: state,
       city: city,
@@ -162,7 +164,7 @@ const Profile = () => {
     }
   };
   
-  const updateProfilePicture = async (event) => {
+  const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {  
       try {
@@ -182,7 +184,7 @@ const Profile = () => {
     }
   };
 
-  const deleteAccount = () => {
+  const handleDeleteAccount = async () => {
     // const deleteProfilePicture = async () => {
     //   const fileRef = ref(storage, profilePictureUrl);
     
@@ -195,7 +197,7 @@ const Profile = () => {
     // };
     // deleteProfilePicture();
 
-    deleteDoc(doc(db, "profiles", user.uid))
+    await deleteDoc(doc(db, "profiles", user.uid))
       .then(() => {
         console.log("Account deleted successfully.");
       })
@@ -203,7 +205,7 @@ const Profile = () => {
         console.error("Error deleting account:", error);
       });
 
-    deleteUser(user)
+    await deleteUser(user)
       .then(() => {
         console.log("User account deleted successfully.");
       }).catch((error) => {
@@ -211,185 +213,264 @@ const Profile = () => {
       });
   };
 
-  const states = [
-    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
-    "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
-    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
-  ];
-
   return (
-    <Box
-      sx={{
-        minHeight: '100vh', // Full height of the viewport
-        display: 'flex',
-        justifyContent: 'center',
-      }}
-    >
-      <Container
-        sx={{
-          padding: 4,
-          maxWidth: '500px',
-          backgroundColor: '#ffffff', 
-          borderRadius: 0,
-          boxShadow: 0
-        }}
+    <Paper elevation={3} sx={{ padding: 4, maxWidth: 800, margin: 'auto', position: 'relative' }}>
+      
+      {/* Edit Text at the Top Right */}
+      <Button
+        color="primary"
+        onClick={handleEditClick}
+        sx={{ position: 'absolute', top: 16, right: 16 }}
       >
-        <Grid container spacing={2} alignItems="center" > 
-        <Grid item>
-          <label htmlFor="profile-pic-upload">
-            <Avatar
-              alt={username}
-              src={profilePictureUrl}
-              sx={{ width: 120, height: 120, cursor: 'pointer' }}
-            />
-            <input
-              id="profile-pic-upload"
-              type="file"
-              accept="image/*"
-              onChange={updateProfilePicture}
-              style={{ display: 'none' }}
-            />
-          </label>
+        Edit
+      </Button>
+
+      <Grid container spacing={2}>
+        {/* Left Side - Profile Picture, Username, Member Since, and Delete Account Button */}
+        <Grid item xs={2} sx={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Avatar 
+            alt="User Profile" 
+            src={profilePictureUrl} 
+            sx={{ width: 100, height: 100, marginBottom: 2 }}
+          />
+          
+          {/* Profile Picture Upload Button */}
+          {isEditing && (
+            <Button
+              variant="contained"
+              component="label"
+              sx={{ marginBottom: 2 }}
+            >
+              Upload Picture
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleProfilePicChange}
+              />
+            </Button>
+          )}
+
+          {/* Editable Username */}
+          {isEditing ? (
+            <>
+              <Typography variant="body2" color="textSecondary">Username</Typography>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                style={{
+                  border: 'none',
+                  borderBottom: '1px solid #ccc',
+                  outline: 'none',
+                  textAlign: 'center',
+                  fontSize: '1.2rem',
+                  marginBottom: '0.5rem',
+                  width: '100%',
+                  color: 'black', // Changed color to black
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Typography variant="body2" color="textSecondary">Username</Typography>
+              <Typography variant="h6" sx={{ marginBottom: 1, color: 'black' }}>
+                {username}
+              </Typography>
+            </>
+          )}
+
+          {/* User Type Field */}
+          <Typography variant="body2" color="textSecondary">User Type</Typography>
+          {isEditing ? (
+            <select
+              value={userType}
+              onChange={(e) => setUserType(e.target.value)}
+              style={{
+                border: 'none',
+                borderBottom: '1px solid #ccc',
+                outline: 'none',
+                textAlign: 'center',
+                fontSize: '1rem',
+                marginBottom: '0.5rem',
+                width: '100%',
+                color: 'black', // Changed color to black
+              }}
+            >
+              <option value="Renter">Renter</option>
+              <option value="Landlord">Landlord</option>
+            </select>
+          ) : (
+            <Typography variant="h6" sx={{ marginBottom: 2, color: 'black' }}>
+              {userType}
+            </Typography>
+          )}
+
+          <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 2 }}>
+            Member since: {memberSince}
+          </Typography>
+
+          {/* Delete Account Button */}
           <Button 
             variant="contained" 
-            component="label" 
-            htmlFor="profile-pic-upload"
-            size="small"
-            sx={{ marginTop: 1 }}
+            color="error"
+            onClick={handleDeleteAccount}
+            sx={{ marginTop: 'auto', width: '100%' }}
           >
-            Upload Image
+            Delete Account
           </Button>
         </Grid>
 
-          <Grid item>
-            <Typography variant="h4" fontWeight="bold">
-              {username}
+        {/* Divider */}
+        <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+
+        {/* Right Side - Profile Information */}
+        <Grid item xs={8}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography variant="h5" gutterBottom>
+              Profile Details
             </Typography>
-            <Typography variant="h6" color="textSecondary">
-              Member Since: {memberSince}
-            </Typography>
-          </Grid>
-        </Grid>
 
-        <Divider sx={{ marginY: 2 }} /> 
-
-        <Grid container spacing={2} sx={{ marginTop: 2 }}>
-          <Grid item xs={6}>
-            <TextField
-              label="First Name"
-              variant="outlined"
-              fullWidth
-              value={firstName}
-              onChange={handleFirstNameChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Last Name"
-              variant="outlined"
-              fullWidth
-              value={lastName}
-              onChange={handleLastNameChange}
-            />
-          </Grid>
-        </Grid>
-
-        <TextField
-          label="Email"
-          variant="outlined"
-          fullWidth
-          value={email}
-          onChange={handleEmailChange}
-          sx={{ marginTop: 3 }}
-        />
-
-        <Grid container spacing={2} alignItems="center" sx={{ marginTop: 2 }}>
-          <Grid item xs={6}>
-            <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select
-                value={role}
-                onChange={handleRoleChange}
-                label="Role"
-              >
-                <MenuItem value="Renter">Renter</MenuItem>
-                <MenuItem value="Landlord">Landlord</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Phone"
-              variant="outlined"
-              fullWidth
-              value={phone}
-              onChange={handlePhoneChange}
-            />
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={2} alignItems="center" sx={{ marginTop: 2 }}>
-          <Grid item xs={6}>
-            <FormControl fullWidth>
-              <InputLabel>State</InputLabel>
-              <Select
+            <Box>
+              <Typography variant="body2" color="textSecondary">First Name</Typography>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                disabled={!isEditing}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  width: '100%',
+                  marginBottom: '16px',
+                  opacity: isEditing ? 1 : 0.7,
+                  color: 'black', // Changed color to black
+                }}
+              />
+              
+              <Typography variant="body2" color="textSecondary">Last Name</Typography>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                disabled={!isEditing}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  width: '100%',
+                  marginBottom: '16px',
+                  opacity: isEditing ? 1 : 0.7,
+                  color: 'black', // Changed color to black
+                }}
+              />
+              
+              <Typography variant="body2" color="textSecondary">Email</Typography>
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={!isEditing}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  width: '100%',
+                  marginBottom: '16px',
+                  opacity: isEditing ? 1 : 0.7,
+                  color: 'black', // Changed color to black
+                }}
+              />
+              
+              <Typography variant="body2" color="textSecondary">Phone</Typography>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                disabled={!isEditing}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  width: '100%',
+                  marginBottom: '16px',
+                  opacity: isEditing ? 1 : 0.7,
+                  color: 'black', // Changed color to black
+                }}
+              />
+              
+              <Typography variant="body2" color="textSecondary">City</Typography>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                disabled={!isEditing}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  width: '100%',
+                  marginBottom: '16px',
+                  opacity: isEditing ? 1 : 0.7,
+                  color: 'black', // Changed color to black
+                }}
+              />
+              
+              <Typography variant="body2" color="textSecondary">State</Typography>
+              <input
+                type="text"
                 value={state}
-                onChange={handleStateChange}
-                label="State"
-              >
-                {states.map((stateName) => (
-                  <MenuItem key={stateName} value={stateName}>
-                    {stateName}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="City"
-              variant="outlined"
-              fullWidth
-              value={city}
-              onChange={handleCityChange}
-            />
-          </Grid>
+                onChange={(e) => setState(e.target.value)}
+                disabled={!isEditing}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  width: '100%',
+                  marginBottom: '16px',
+                  opacity: isEditing ? 1 : 0.7,
+                  color: 'black', // Changed color to black
+                }}
+              />
+            </Box>
+
+            {/* Bio/About Me Section */}
+            <Box sx={{ marginTop: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                About Me
+              </Typography>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                disabled={!isEditing}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  width: '100%',
+                  height: '100px',
+                  opacity: isEditing ? 1 : 0.7,
+                  color: 'black', // Changed color to black
+                }}
+              />
+            </Box>
+          </Box>
+
+          {/* Save Button */}
+          {isEditing && (
+            <Button 
+              variant="contained" 
+              color="primary"
+              onClick={handleSaveClick}
+              sx={{ marginTop: 2 }}
+            >
+              Save
+            </Button>
+          )}
         </Grid>
-
-        <TextField
-          label="Bio"
-          variant="outlined"
-          fullWidth
-          multiline
-          rows={4}
-          value={bio}
-          onChange={handleBioChange}
-          sx={{ marginTop: 3 }}
-        />
-
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={handleUpdateProfile}
-          sx={{ marginTop: 3 }}
-        >
-          Update Profile
-        </Button>
-
-        <Button
-          variant="outlined"
-          color="error"
-          fullWidth
-          onClick={deleteAccount}
-          sx={{ marginTop: 3 }}
-        >
-          Delete Account
-        </Button>
-      </Container>
-    </Box>
+      </Grid>
+    </Paper>
   );
 };
 
