@@ -71,7 +71,7 @@ const Search = () => {
     fetchSubleases();
   }, []);
 
-  // Geocode the address to lat/lng using the Google Maps Geocoding API
+
   const geocodeAddress = async (address, sublease) => {
     const geocoder = new window.google.maps.Geocoder();
     const fullAddress = `${address.street}, ${address.city}, ${address.state}, ${address.zip}`;
@@ -90,7 +90,7 @@ const Search = () => {
     });
   };
 
-  // Handle Marker Click - Navigate to sublease page with ID
+
   const handleMarkerClick = (subleaseId) => {
     console.log('Marker clicked with ID:', subleaseId);
     if (subleaseId) {
@@ -111,16 +111,16 @@ const Search = () => {
                 id="sublease-map"
                 mapContainerStyle={{
                   width: '100%',
-                  height: '100%', // Ensure map fills the container
+                  height: '100%', 
                 }}
                 zoom={12}
                 center={userLocation}
               >
-                {/* Render all pins on the map */}
+               
                 {subleases.map((sublease, index) => {
                   if (!sublease.address.lat || !sublease.address.lng) {
                     console.warn(`Missing lat/lng for sublease ${index}:`, sublease);
-                    return null; // Skip rendering if lat/lng are missing
+                    return null; 
                   }
 
                   return (
