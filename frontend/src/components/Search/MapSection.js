@@ -7,11 +7,10 @@ import { useNavigate } from 'react-router-dom';
 
 const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls'; 
 
-const MapSection = (searchResults) => {
+const MapSection = ({ searchResults }) => {
   const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
   const [subleases, setSubleases] = useState([]);
   const navigate = useNavigate(); 
-
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -39,42 +38,54 @@ const MapSection = (searchResults) => {
     }
   }, []);
 
-
   useEffect(() => {
     const fetchSubleases = async () => {
         try {
-          const querySnapshot = await getDocs(collection(db, 'subleases'));
-          const subleasesData = querySnapshot.docs.map((doc) => {
-            return { 
-              id: doc.id, 
-              ...doc.data() // Spread the rest of the document data
-            };
-          });
-          console.log("Fetched Subleases Data:", subleasesData);
+          console.log("searchResults in useEffect:", searchResults); // Debugging line
           
-          if (searchResults.length > 0) {
-            subleasesData = searchResults;
+          // Use the searchResults if they exist
+          if (searchResults && searchResults.length > 0) {
+            console.log('Using search results for subleases');
+            const updatedSubleases = await Promise.all(
+              searchResults.map(async (sublease) => {
+                if (!sublease.address.lat || !sublease.address.lng) {
+                  await geocodeAddress(sublease.address, sublease);
+                }
+                return sublease;
+              })
+            );
+    
+            setSubleases(updatedSubleases);
+          } else {
+            console.log('No search results, fetching all subleases');
+            const querySnapshot = await getDocs(collection(db, 'subleases'));
+            const subleasesData = querySnapshot.docs.map((doc) => {
+              return { 
+                id: doc.id, 
+                ...doc.data() // Spread the rest of the document data
+              };
+            });
+            console.log("Fetched Subleases Data:", subleasesData);
+
+            // Geocode each sublease address to lat/lng if not already present
+            const updatedSubleases = await Promise.all(
+              subleasesData.map(async (sublease) => {
+                if (!sublease.address.lat || !sublease.address.lng) {
+                  await geocodeAddress(sublease.address, sublease);
+                }
+                return sublease;
+              })
+            );
+    
+            setSubleases(updatedSubleases);
           }
-  
-          // Geocode each sublease address to lat/lng if not already present
-          const updatedSubleases = await Promise.all(
-            subleasesData.map(async (sublease) => {
-              if (!sublease.address.lat || !sublease.address.lng) {
-                await geocodeAddress(sublease.address, sublease);
-              }
-              return sublease;
-            })
-          );
-  
-          setSubleases(updatedSubleases);
         } catch (error) {
           console.error('Error fetching subleases:', error);
         }
     };
 
     fetchSubleases();
-  }, []);
-
+  }, [searchResults]); // Run again if searchResults changes
 
   const geocodeAddress = async (address, sublease) => {
     const geocoder = new window.google.maps.Geocoder();
@@ -94,7 +105,6 @@ const MapSection = (searchResults) => {
     });
   };
 
-
   const handleMarkerClick = (subleaseId) => {
     console.log('Marker clicked with ID:', subleaseId);
     if (subleaseId) {
@@ -106,7 +116,6 @@ const MapSection = (searchResults) => {
 
   return (
     <div className="search-page">
-      {/* Left column: Map */}
       <div className="map-container">
         <div className="map-box">
           {userLocation.lat && userLocation.lng ? (
@@ -120,7 +129,6 @@ const MapSection = (searchResults) => {
                 zoom={12}
                 center={userLocation}
               >
-               
                 {subleases.map((sublease, index) => {
                   if (!sublease.address.lat || !sublease.address.lng) {
                     console.warn(`Missing lat/lng for sublease ${index}:`, sublease);
@@ -151,55 +159,3 @@ const MapSection = (searchResults) => {
 };
 
 export default MapSection;
-
-// // src/MapSection/MapSection.js
-// import React, { useEffect, useState } from 'react';
-// import MapContainer from '../MapContainer/MapContainer'; // Assuming MapContainer is in this folder
-
-// const MapSection = () => {
-//   const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
-
-//   useEffect(() => {
-//     if (navigator.geolocation) {
-//       navigator.geolocation.getCurrentPosition(
-//         (position) => {
-//           setUserLocation({
-//             lat: position.coords.latitude,
-//             lng: position.coords.longitude,
-//           });
-//         },
-//         (error) => {
-//           console.error("Error retrieving location:", error);
-//           setUserLocation({
-//             lat: 29.64991, // Default fallback location (you can adjust)
-//             lng: -82.34866,
-//           });
-//         }
-//       );
-//     } else {
-//       console.error("Geolocation is not supported by this browser.");
-//       setUserLocation({
-//         lat: 29.64991,
-//         lng: -82.34866,
-//       });
-//     }
-//   }, []);
-
-//   return (
-//     <div className="map-container">
-//       {/* Left column: Map */}
-//       <div className="map-container">
-//          {/* Display the map with user's current location */}
-//          <div className="map-box">
-//           {userLocation.lat && userLocation.lng ? (
-//             <MapContainer lat={userLocation.lat} lng={userLocation.lng} />
-//           ) : (
-//             <p>Loading your current location...</p>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default MapSection;

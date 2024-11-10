@@ -2,10 +2,10 @@ import React from 'react';
 import SubleaseCard from './SubleaseCard'; // Ensure the path is correct for your project structure
 import { Grid, Typography } from '@mui/material';
 
-const ResultSection = ({ results }) => {
+const ResultSection = ({ searchResults }) => {
   return (
     <div style={{ position: 'relative', height: '750px', overflowY: 'auto' }}> {/* Add relative positioning to this container */}
-      {results.length === 0 ? (
+      {searchResults.length === 0 ? (
         <div 
           style={{
             position: 'absolute',  // Absolute positioning within the parent container
@@ -19,7 +19,7 @@ const ResultSection = ({ results }) => {
         </div>
       ) : (
         <Grid container spacing={0.5} justifyContent="center">
-          {results.map((listing) => (
+          {searchResults.map((listing) => (
             <Grid item key={listing.id}>
               <SubleaseCard
                 images={listing.imageUrls}    

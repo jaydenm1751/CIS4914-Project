@@ -22,11 +22,11 @@ function App() {
       <div style={{ display: 'flex', width: '100%' }}>
         {mapView && 
           <div style={{ flex: 1 }}>
-            <MapSection results={results} />
+            <MapSection searchResults={results} />
           </div>
         }
         <div style={{ flex: 1, padding: '0px' }}>
-          <ResultsSection results={results} />
+          <ResultsSection searchResults={results} />
         </div>
       </div>
     </div>
