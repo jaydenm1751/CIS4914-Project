@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import './Search.css'; 
-import MapContainer from '../MapContainer/MapContainer';
+import { db } from '../../config/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { useNavigate } from 'react-router-dom'; // Importing navigate hook
+
+const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls'; // Replace with your Google API key
 
 const Search = () => {
   const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
+  const [subleases, setSubleases] = useState([]);
+  const navigate = useNavigate(); // Initialize the navigate function
 
   // Use the Geolocation API to get the user's current location
   useEffect(() => {
@@ -17,7 +24,7 @@ const Search = () => {
         },
         (error) => {
           console.error("Error retrieving location:", error);
-          // we should show a default location if retrieval is disallowed...
+          // Default location if geolocation is disallowed
           setUserLocation({
             lat: 29.64991,
             lng: -82.34866,
@@ -31,16 +38,106 @@ const Search = () => {
         lng: -82.34866,
       });
     }
-  }, []); // Run this once when the component is mounted
+  }, []);
+
+  // Fetch and geocode subleases addresses
+  useEffect(() => {
+    const fetchSubleases = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'subleases'));
+        const subleasesData = querySnapshot.docs.map((doc) => {
+          return { 
+            id: doc.id, // Add the document ID here
+            ...doc.data() // Spread the rest of the document data
+          };
+        });
+        console.log("Fetched Subleases Data:", subleasesData);
+
+        // Geocode each sublease address to lat/lng if not already present
+        const updatedSubleases = await Promise.all(
+          subleasesData.map(async (sublease) => {
+            if (!sublease.address.lat || !sublease.address.lng) {
+              await geocodeAddress(sublease.address, sublease);
+            }
+            return sublease;
+          })
+        );
+
+        setSubleases(updatedSubleases);
+      } catch (error) {
+        console.error('Error fetching subleases:', error);
+      }
+    };
+
+    fetchSubleases();
+  }, []);
+
+  // Geocode the address to lat/lng using the Google Maps Geocoding API
+  const geocodeAddress = async (address, sublease) => {
+    const geocoder = new window.google.maps.Geocoder();
+    const fullAddress = `${address.street}, ${address.city}, ${address.state}, ${address.zip}`;
+    return new Promise((resolve, reject) => {
+      geocoder.geocode({ address: fullAddress }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const lat = results[0].geometry.location.lat();
+          const lng = results[0].geometry.location.lng();
+          sublease.address.lat = lat;
+          sublease.address.lng = lng;
+          resolve();
+        } else {
+          reject(`Geocode failed for address: ${fullAddress}, status: ${status}`);
+        }
+      });
+    });
+  };
+
+  // Handle Marker Click - Navigate to sublease page with ID
+  const handleMarkerClick = (subleaseId) => {
+    console.log('Marker clicked with ID:', subleaseId);
+    if (subleaseId) {
+      navigate(`/sublease/${subleaseId}`);
+    } else {
+      console.warn('No sublease ID found for this marker');
+    }
+  };
 
   return (
     <div className="search-page">
       {/* Left column: Map */}
       <div className="map-container">
-         {/* Display the map with user's current location */}
-         <div className="map-box">
+        <div className="map-box">
           {userLocation.lat && userLocation.lng ? (
-            <MapContainer lat={userLocation.lat} lng={userLocation.lng} />
+            <LoadScript googleMapsApiKey={GOOGLE_API_KEY}>
+              <GoogleMap
+                id="sublease-map"
+                mapContainerStyle={{
+                  width: '100%',
+                  height: '100%', // Ensure map fills the container
+                }}
+                zoom={12}
+                center={userLocation}
+              >
+                {/* Render all pins on the map */}
+                {subleases.map((sublease, index) => {
+                  if (!sublease.address.lat || !sublease.address.lng) {
+                    console.warn(`Missing lat/lng for sublease ${index}:`, sublease);
+                    return null; // Skip rendering if lat/lng are missing
+                  }
+
+                  return (
+                    <Marker
+                      key={index}
+                      position={{
+                        lat: sublease.address.lat,
+                        lng: sublease.address.lng,
+                      }}
+                      title={sublease.title}
+                      onClick={() => handleMarkerClick(sublease.id)} // Ensure the correct ID is passed
+                    />
+                  );
+                })}
+              </GoogleMap>
+            </LoadScript>
           ) : (
             <p>Loading your current location...</p>
           )}
@@ -73,7 +170,6 @@ const Search = () => {
           <button type="submit" className="search-button">Search</button>
         </form>
 
-   
         <div className="additional-parameters">
           <p>Additional search parameters to be added accordingly.</p>
         </div>
