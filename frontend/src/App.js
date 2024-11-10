@@ -23,7 +23,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/sublease/:id" element={<SubleaseDetails />} />
-          <Route path="/CreatePost" element={<CreatePost />} />
+          <Route path="/create-post" element={<CreatePost />} />
           <Route path="/login" element={<AuthRedirect />} />
         </Routes>
       </UserContextProvider>

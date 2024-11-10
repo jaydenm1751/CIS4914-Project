@@ -28,11 +28,13 @@ const CreatePost = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user == null) {
-      console.log('User is not logged in. Redirecting to login...');
-      navigate('/login-redirect/');
+    if (!loading) {
+      if (!user) {
+        console.log('User is not logged in. Redirecting to login...');
+        navigate('/login?redirect=/create-post');
+      } 
     }
-  }, [user, loading]);
+  }, [user, loading, navigate]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -76,10 +78,20 @@ const CreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate if rent, sqft, numBedrooms, and numBathrooms are numbers
+    const numericFields = { rent, sqft, numBedrooms, numBathrooms };
+    for (const [fieldName, value] of Object.entries(numericFields)) {
+      if (isNaN(value) || value <= 0) {
+        alert(`${fieldName} must be a positive number.`);
+        return; // Stop submission if validation fails
+      }
+    }
+  
     if (!await validateAddress()) {
       return; // Stop submission if the address is invalid
     }
-    
+  
     try {
       const imageUrls = [];
       for (let file of imageFiles) {
@@ -88,21 +100,21 @@ const CreatePost = () => {
         const downloadUrl = await getDownloadURL(snapshot.ref);
         imageUrls.push(downloadUrl);
       }
-
+  
       const subleaseData = {
         title,
         description,
-        rent,
-        numBedrooms,
-        numBathrooms,
-        sqft,
+        rent: Number(rent), // Ensure data type is number
+        numBedrooms: Number(numBedrooms),
+        numBathrooms: Number(numBathrooms),
+        sqft: Number(sqft),
         imageUrls,
         address: { street, city, state, zip },
-        userID: user.uid
+        userID: user.uid,
       };
-
+  
       await addDoc(collection(db, 'subleases'), subleaseData);
-
+  
       // Clear form after submission
       setTitle('');
       setDescription('');
@@ -116,7 +128,7 @@ const CreatePost = () => {
       setZip('');
       setImageFiles([]);
       alert('Sublease created successfully!');
-
+  
       navigate('/');
     } catch (error) {
       console.error('Error creating sublease:', error);

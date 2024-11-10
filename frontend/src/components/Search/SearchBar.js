@@ -12,8 +12,8 @@ function SearchBar({ onSearch, onViewChange }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [roomAnchorEl, setRoomAnchorEl] = useState(null);
   const [minPrice, setMinPrice] = useState(0);  // Default minPrice to 0
-  const [maxPrice, setMaxPrice] = useState(Infinity);  // Default maxPrice to Infinity
-  const [minRooms, setMinRooms] = useState('');
+  const [maxPrice, setMaxPrice] = useState(100000);  // Default maxPrice to Infinity
+  const [minRooms, setMinRooms] = useState(0);
   const [view, setView] = useState('map');
 
   const handleInputChange = (event) => {
@@ -33,48 +33,48 @@ function SearchBar({ onSearch, onViewChange }) {
     setRoomAnchorEl(null);
   };
 
-  const validateInputs = () => {
-    // Validate minPrice and maxPrice
-    const min = parseFloat(minPrice);
-    const max = parseFloat(maxPrice);
-    const rooms = parseInt(minRooms, 10);
+  const handleMinPriceChange = (event) => {
+    const min = parseFloat(event.target.value);
 
-    // If minPrice or maxPrice is invalid, reset them to default values
     if (minPrice && isNaN(min)) {
-      setMinPrice('0');  // Reset minPrice to 0
+      setMinPrice(0); 
+    } else {
+      setMinPrice(min);
     }
-    if (maxPrice && isNaN(max)) {
-      setMaxPrice(Infinity);  
-    }
-    if (min > max) {
-      setMaxPrice(Infinity);
-    }
+  }
 
-    // Validate minRoom
-    if (minRooms && isNaN(rooms)) {
-      setMinRooms('0'); 
+  const handleMaxPriceChange = (event) => {
+    const max = parseFloat(event.target.value);
+
+    if (minPrice && isNaN(max)) {
+      setMaxPrice(100000); 
+    } else {
+      setMaxPrice(max);
     }
-    if (rooms < 0) {
-      setMinRooms('0'); 
+  }
+
+  const handleMinRoomsChange = (event) => {
+    const min = parseFloat(event.target.value);
+
+    if (minPrice && isNaN(min)) {
+      setMinRooms(0); 
+    } else {
+      setMinRooms(min);
     }
-  };
+  }
 
   const fetchSubleases = async () => {
     try {
-      // Define your collection reference
       const subleasesRef = collection(firestore, "subleases");
-
-      console.log(minPrice);
-      console.log(maxPrice);
-      console.log(minRooms);
+      // console.log("minPrice:", minPrice, "Type:", typeof minPrice);
+      // console.log("maxPrice:", maxPrice, "Type:", typeof maxPrice);
+      // console.log("minRooms:", minRooms, "Type:", typeof minRooms);
       
-
-      // Create the query with filters for address, price, and number of bedrooms
       const q = query(
         subleasesRef,
-        where("rent", ">=", minPrice),
-        where("rent", "<=", maxPrice),
-        where("numBedrooms", ">=", minRooms)
+        where("rent", ">=", Number(minPrice)),
+        where("rent", "<=", Number(maxPrice)),
+        where("numBedrooms", ">=", Number(minRooms))
       );
 
       // Execute the query
@@ -84,30 +84,16 @@ function SearchBar({ onSearch, onViewChange }) {
       querySnapshot.forEach((doc) => {
         fetchedSubleases.push({ id: doc.id, ...doc.data() });
       });
+
       onSearch(fetchedSubleases);
     } catch (error) {
       console.error("Error fetching subleases: ", error);
     }
   };
 
-  // const handleSearch = () => {
-  //   validateInputs();
-
-  //   const searchQuery = {
-  //     query,
-  //     minPrice: parseFloat(minPrice),  // Convert to number when sending to parent
-  //     maxPrice: maxPrice === 'Infinity' ? Infinity : parseFloat(maxPrice),  // Convert Infinity if applicable
-  //     minRooms
-  //   };
-
-  //   onSearch(searchQuery);
-  //   handlePopoverClose();
-  // };
-
   const handleSearch = () => {
-    validateInputs();
     fetchSubleases();
-    handlePopoverClose(); // Close the popover after search
+    handlePopoverClose(); // Close the popovers after search
   };
 
   const openPrice = Boolean(anchorEl);
@@ -226,7 +212,7 @@ function SearchBar({ onSearch, onViewChange }) {
               label="Min Price"
               type="number"
               value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
+              onChange={handleMinPriceChange}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}
@@ -248,7 +234,7 @@ function SearchBar({ onSearch, onViewChange }) {
               label="Max Price"
               type="number"
               value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
+              onChange={handleMaxPriceChange}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}
@@ -301,7 +287,7 @@ function SearchBar({ onSearch, onViewChange }) {
             label="Min Rooms"
             type="number"
             value={minRooms}
-            onChange={(e) => setMinRooms(e.target.value)}
+            onChange={handleMinRoomsChange}
             fullWidth
             sx={{
               '& .MuiInputLabel-root': {
