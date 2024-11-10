@@ -27,7 +27,7 @@ const Home = () => {
 
     // Function to handle button click
     const handleCreatePostClick = () => {
-        navigate('/createpost'); // Navigate to Create Post page
+        navigate('/create-post'); // Navigate to Create Post page
     };
 
     return (

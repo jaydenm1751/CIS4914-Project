@@ -65,7 +65,7 @@ const AuthRedirect = () => {
   }
 
   return (
-    <div className="background">
+    <div className="auth-background">
       <Card sx={{  margin: 'auto', padding: 3 }}>
         <CardHeader
           title="Welcome to Subleaser"
