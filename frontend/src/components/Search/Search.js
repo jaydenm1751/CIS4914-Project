@@ -3,16 +3,16 @@ import './Search.css';
 import { db } from '../../config/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { useNavigate } from 'react-router-dom'; // Importing navigate hook
+import { useNavigate } from 'react-router-dom'; 
 
-const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls'; // Replace with your Google API key
+const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls'; 
 
 const Search = () => {
   const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
   const [subleases, setSubleases] = useState([]);
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate(); 
 
-  // Use the Geolocation API to get the user's current location
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -24,7 +24,6 @@ const Search = () => {
         },
         (error) => {
           console.error("Error retrieving location:", error);
-          // Default location if geolocation is disallowed
           setUserLocation({
             lat: 29.64991,
             lng: -82.34866,
@@ -40,14 +39,14 @@ const Search = () => {
     }
   }, []);
 
-  // Fetch and geocode subleases addresses
+
   useEffect(() => {
     const fetchSubleases = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'subleases'));
         const subleasesData = querySnapshot.docs.map((doc) => {
           return { 
-            id: doc.id, // Add the document ID here
+            id: doc.id, 
             ...doc.data() // Spread the rest of the document data
           };
         });
