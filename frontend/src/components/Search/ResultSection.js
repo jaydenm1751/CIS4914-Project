@@ -1,18 +1,17 @@
 import React from 'react';
-import SubleaseCard from './SubleaseCard'; // Ensure the path is correct for your project structure
+import SubleaseCard from './SubleaseCard'; 
 import { Grid, Typography } from '@mui/material';
 
 const ResultSection = ({ searchResults }) => {
   return (
-    <div style={{ position: 'relative', height: '750px', overflowY: 'auto' }}> {/* Add relative positioning to this container */}
+    <div style={{ position: 'relative', height: '100vh', overflowY: 'auto' }}> 
       {searchResults.length === 0 ? (
         <div 
           style={{
-            position: 'absolute',  // Absolute positioning within the parent container
-            top: '20px',           // 10px from the top
-            left: '20px',          // 10px from the left
+            position: 'absolute',
+            top: '20px',           
+            left: '20px',
             textAlign: 'center',
-            zIndex: 1,             // Ensure it's on top of other content
           }}
         >
           <Typography>No results found...</Typography>

@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import './Search.css'; 
 import { db } from '../../config/firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom'; 
-
-const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls'; 
+import { useGoogleMaps } from '../../contexts/GoogleMapsContext';
 
 const MapSection = ({ searchResults }) => {
+  const { isLoaded } = useGoogleMaps();
+
   const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
   const [subleases, setSubleases] = useState([]);
   const navigate = useNavigate(); 
@@ -40,9 +41,7 @@ const MapSection = ({ searchResults }) => {
 
   useEffect(() => {
     const fetchSubleases = async () => {
-        try {
-          console.log("searchResults in useEffect:", searchResults); // Debugging line
-          
+        try {          
           // Use the searchResults if they exist
           if (searchResults && searchResults.length > 0) {
             console.log('Using search results for subleases');
@@ -85,7 +84,7 @@ const MapSection = ({ searchResults }) => {
     };
 
     fetchSubleases();
-  }, [searchResults]); // Run again if searchResults changes
+  }, [searchResults]); 
 
   const geocodeAddress = async (address, sublease) => {
     const geocoder = new window.google.maps.Geocoder();
@@ -114,41 +113,95 @@ const MapSection = ({ searchResults }) => {
     }
   };
 
-  return (
+  const mapStyle = [
+    {
+      featureType: "poi.business",
+      stylers: [{ visibility: "off" }] // Hide business points of interest
+    },
+    {
+      featureType: "poi.attraction",
+      stylers: [{ visibility: "on" }] // Keep other POIs visible if desired
+    },
+    {
+      featureType: "poi.park",
+      stylers: [{ visibility: "on" }] // Example to keep parks visible
+    },
+    {
+      elementType: "geometry",
+      stylers: [{ color: "#e8f1ff" }] // Light blue for the background
+    },
+    {
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#334e87" }] // Dark blue for text labels
+    },
+    {
+      elementType: "labels.text.stroke",
+      stylers: [{ color: "#ffffff" }] // White outline for text
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#ffffff" }] // White roads
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#b4d4ff" }] // Blue for water areas
+    },
+    {
+      featureType: "poi",
+      elementType: "geometry",
+      stylers: [{ color: "#e8f1ff" }] // Light blue for points of interest
+    },
+    {
+      featureType: "landscape.man_made",
+      elementType: "geometry",
+      stylers: [{ color: "#e8f1ff" }] // Light blue for man-made landscape
+    },
+    {
+      featureType: "transit",
+      elementType: "geometry",
+      stylers: [{ color: "#d1e3ff" }] // Slightly different blue for transit areas
+    }
+  ];
+
+  return !isLoaded ? <p>Loading...</p> : (
     <div className="search-page">
       <div className="map-container">
         <div className="map-box">
           {userLocation.lat && userLocation.lng ? (
-            <LoadScript googleMapsApiKey={GOOGLE_API_KEY}>
-              <GoogleMap
-                id="sublease-map"
-                mapContainerStyle={{
-                  width: '100%',
-                  height: '100%', 
-                }}
-                zoom={12}
-                center={userLocation}
-              >
-                {subleases.map((sublease, index) => {
-                  if (!sublease.address.lat || !sublease.address.lng) {
-                    console.warn(`Missing lat/lng for sublease ${index}:`, sublease);
-                    return null; 
-                  }
+            <GoogleMap
+              id="sublease-map"
+              mapContainerStyle={{
+                width: '100%',
+                height: '100%', 
+              }}
+              zoom={12}
+              center={userLocation}
+              options={{
+                styles: mapStyle,
+                gestureHandling: "greedy",
+              }}
+            >
+              {subleases.map((sublease, index) => {
+                if (!sublease.address.lat || !sublease.address.lng) {
+                  console.warn(`Missing lat/lng for sublease ${index}:`, sublease);
+                  return null; 
+                }
 
-                  return (
-                    <Marker
-                      key={index}
-                      position={{
-                        lat: sublease.address.lat,
-                        lng: sublease.address.lng,
-                      }}
-                      title={sublease.title}
-                      onClick={() => handleMarkerClick(sublease.id)} // Ensure the correct ID is passed
-                    />
-                  );
-                })}
-              </GoogleMap>
-            </LoadScript>
+                return (
+                  <Marker
+                    key={index}
+                    position={{
+                      lat: sublease.address.lat,
+                      lng: sublease.address.lng,
+                    }}
+                    title={sublease.title}
+                    onClick={() => handleMarkerClick(sublease.id)} // Ensure the correct ID is passed
+                  />
+                );
+              })}
+            </GoogleMap>
           ) : (
             <p>Loading your current location...</p>
           )}

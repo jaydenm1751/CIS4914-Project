@@ -19,7 +19,7 @@ function App() {
   return (
     <div>
       <AddressSearchToolbar onSearch={handleSearch} onViewChange={toggleViewChange} />
-      <div style={{ display: 'flex', width: '100%' }}>
+      <div style={{ display: 'flex', width: '100%', overflow: 'hidden' }}>
         {mapView && 
           <div style={{ flex: 1 }}>
             <MapSection searchResults={results} />
