@@ -6,38 +6,11 @@ import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom'; 
 import { useGoogleMaps } from '../../contexts/GoogleMapsContext';
 
-const MapSection = ({ searchResults }) => {
+const MapSection = ({ mapCenter, searchResults }) => {
+  const navigate = useNavigate();
   const { isLoaded } = useGoogleMaps();
 
-  const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
   const [subleases, setSubleases] = useState([]);
-  const navigate = useNavigate(); 
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error retrieving location:", error);
-          setUserLocation({
-            lat: 29.64991,
-            lng: -82.34866,
-          });
-        }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-      setUserLocation({
-        lat: 29.64991,
-        lng: -82.34866,
-      });
-    }
-  }, []);
 
   useEffect(() => {
     const fetchSubleases = async () => {
@@ -56,27 +29,8 @@ const MapSection = ({ searchResults }) => {
     
             setSubleases(updatedSubleases);
           } else {
-            console.log('No search results, fetching all subleases');
-            const querySnapshot = await getDocs(collection(db, 'subleases'));
-            const subleasesData = querySnapshot.docs.map((doc) => {
-              return { 
-                id: doc.id, 
-                ...doc.data() // Spread the rest of the document data
-              };
-            });
-            console.log("Fetched Subleases Data:", subleasesData);
-
-            // Geocode each sublease address to lat/lng if not already present
-            const updatedSubleases = await Promise.all(
-              subleasesData.map(async (sublease) => {
-                if (!sublease.address.lat || !sublease.address.lng) {
-                  await geocodeAddress(sublease.address, sublease);
-                }
-                return sublease;
-              })
-            );
-    
-            setSubleases(updatedSubleases);
+            console.log('No search results');
+            setSubleases([]);
           }
         } catch (error) {
           console.error('Error fetching subleases:', error);
@@ -169,7 +123,7 @@ const MapSection = ({ searchResults }) => {
     <div className="search-page">
       <div className="map-container">
         <div className="map-box">
-          {userLocation.lat && userLocation.lng ? (
+          {mapCenter && mapCenter.lat && mapCenter.lng ? (
             <GoogleMap
               id="sublease-map"
               mapContainerStyle={{
@@ -177,7 +131,7 @@ const MapSection = ({ searchResults }) => {
                 height: '100%', 
               }}
               zoom={12}
-              center={userLocation}
+              center={mapCenter}
               options={{
                 styles: mapStyle,
                 gestureHandling: "greedy",

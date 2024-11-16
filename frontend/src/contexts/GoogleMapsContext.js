@@ -1,6 +1,5 @@
-// GoogleMapsContext.js
-import React, { createContext, useContext } from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLoadScript } from '@react-google-maps/api';
 
 const GoogleMapsContext = createContext();
 
@@ -12,11 +11,19 @@ export const GoogleMapsProvider = ({ children }) => {
     libraries: ["places"],
   });
 
+  const [geocoder, setGeocoder] = useState(null);
+
+  useEffect(() => {
+    if (isLoaded && !geocoder) {
+      setGeocoder(new window.google.maps.Geocoder());
+    }
+  }, [isLoaded, geocoder]);
+
   if (loadError) return <div>Error loading maps</div>;
   if (!isLoaded) return <div>Loading Maps</div>;
 
   return (
-    <GoogleMapsContext.Provider value={{ isLoaded }}>
+    <GoogleMapsContext.Provider value={{ isLoaded, geocoder }}>
       {children}
     </GoogleMapsContext.Provider>
   );
