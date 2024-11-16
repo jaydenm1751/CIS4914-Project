@@ -13,14 +13,14 @@ export const GoogleMapsProvider = ({ children }) => {
 
   const [geocoder, setGeocoder] = useState(null);
 
-  useEffect(() => {
-    if (isLoaded && !geocoder) {
+    useEffect(() => {
+    if (isLoaded && window.google && !geocoder) {
       setGeocoder(new window.google.maps.Geocoder());
     }
   }, [isLoaded, geocoder]);
 
   if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading Maps</div>;
+  if (!isLoaded || !geocoder) return <div>Loading Maps</div>;
 
   return (
     <GoogleMapsContext.Provider value={{ isLoaded, geocoder }}>

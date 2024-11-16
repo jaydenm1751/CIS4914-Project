@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import './Search.css'; 
-import { db } from '../../config/firebase';
-import { collection, getDocs } from 'firebase/firestore';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom'; 
 import { useGoogleMaps } from '../../contexts/GoogleMapsContext';
@@ -14,10 +12,8 @@ const MapSection = ({ mapCenter, searchResults }) => {
 
   useEffect(() => {
     const fetchSubleases = async () => {
-        try {          
-          // Use the searchResults if they exist
+        try {
           if (searchResults && searchResults.length > 0) {
-            console.log('Using search results for subleases');
             const updatedSubleases = await Promise.all(
               searchResults.map(async (sublease) => {
                 if (!sublease.address.lat || !sublease.address.lng) {
@@ -29,7 +25,6 @@ const MapSection = ({ mapCenter, searchResults }) => {
     
             setSubleases(updatedSubleases);
           } else {
-            console.log('No search results');
             setSubleases([]);
           }
         } catch (error) {
@@ -74,49 +69,12 @@ const MapSection = ({ mapCenter, searchResults }) => {
     },
     {
       featureType: "poi.attraction",
-      stylers: [{ visibility: "on" }] // Keep other POIs visible if desired
+      stylers: [{ visibility: "on" }] // Keep other POIs visible
     },
     {
       featureType: "poi.park",
-      stylers: [{ visibility: "on" }] // Example to keep parks visible
+      stylers: [{ visibility: "on" }] // Keep parks visible
     },
-    {
-      elementType: "geometry",
-      stylers: [{ color: "#e8f1ff" }] // Light blue for the background
-    },
-    {
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#334e87" }] // Dark blue for text labels
-    },
-    {
-      elementType: "labels.text.stroke",
-      stylers: [{ color: "#ffffff" }] // White outline for text
-    },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#ffffff" }] // White roads
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#b4d4ff" }] // Blue for water areas
-    },
-    {
-      featureType: "poi",
-      elementType: "geometry",
-      stylers: [{ color: "#e8f1ff" }] // Light blue for points of interest
-    },
-    {
-      featureType: "landscape.man_made",
-      elementType: "geometry",
-      stylers: [{ color: "#e8f1ff" }] // Light blue for man-made landscape
-    },
-    {
-      featureType: "transit",
-      elementType: "geometry",
-      stylers: [{ color: "#d1e3ff" }] // Slightly different blue for transit areas
-    }
   ];
 
   return !isLoaded ? <p>Loading...</p> : (

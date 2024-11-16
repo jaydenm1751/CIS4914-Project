@@ -2,7 +2,9 @@ import React from 'react';
 import SubleaseCard from './SubleaseCard'; 
 import { Grid, Typography } from '@mui/material';
 
-const ResultSection = ({ searchResults }) => {
+const ResultSection = ({ searchResults, viewMode }) => {
+  const columnSize = viewMode === 'map' ? 6 : 3;
+
   return (
     <div style={{ position: 'relative', height: '100vh', overflowY: 'auto' }}> 
       {searchResults.length === 0 ? (
@@ -17,10 +19,19 @@ const ResultSection = ({ searchResults }) => {
           <Typography>No results found...</Typography>
         </div>
       ) : (
-        <Grid container spacing={0.5} justifyContent="center">
+        <Grid container spacing={0} justifyContent="center">
           {searchResults.map((listing) => (
-            <Grid item key={listing.id}>
+            <Grid 
+              item 
+              xs={12} 
+              md={columnSize} 
+              key={listing.id} 
+              display="flex" 
+              alignItems="center" 
+              justifyContent="center"
+            >
               <SubleaseCard
+                subleaseId={listing.id}
                 images={listing.imageUrls}    
                 price={listing.rent}        
                 rooms={listing.numBedrooms}     

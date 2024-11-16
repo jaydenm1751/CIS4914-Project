@@ -19,7 +19,7 @@ function SearchBar({ onSearch }) {
   const [zip, setZip] = useState('');
 
   const handleSearch = () => {
-    if (geocoder && address) {
+    if (isLoaded && geocoder && address) {
       geocoder.geocode({ address: address }, (results, status) => {
         if (status === window.google.maps.GeocoderStatus.OK) {
           const bestMatch = results[0];
@@ -28,6 +28,12 @@ function SearchBar({ onSearch }) {
           onSearch(bestMatch);
         } 
       });
+    }
+  };
+  
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
     }
   };
   
@@ -79,10 +85,11 @@ function SearchBar({ onSearch }) {
         >
           <TextField
             hiddenLabel
-            placeholder="Address, neighborhood, city, ZIP"
+            placeholder="Address, neighborhood, city"
             variant="outlined"
             size="small"
             value={address}
+            onKeyPress={handleKeyPress} 
             onChange={(event) => setAddress(event.target.value)}
             sx={{
               marginRight: '10px',

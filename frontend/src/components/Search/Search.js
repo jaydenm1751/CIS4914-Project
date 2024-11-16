@@ -6,7 +6,7 @@ import MapSection from './MapSection';
 import ResultSection from './ResultSection';
 
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
-import { AppBar, Toolbar, TextField, IconButton, Box, Popover, Button, InputAdornment, Typography, Divider, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { AppBar, Toolbar, Box, Divider } from '@mui/material';
 import { useGoogleMaps } from '../../contexts/GoogleMapsContext';
 
 const firestore = getFirestore();
@@ -84,7 +84,7 @@ function Search() {
     if (selectedLocation) {
       fetchSubleases();
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, filters]);
 
   const fetchSubleases = async () => {
     const addressComponents = selectedLocation.address_components;
@@ -123,9 +123,9 @@ function Search() {
       if (state && state.trim() !== '') {
         q = query(q, where("address.state", "==", state));
       }
-      if (zip && zip.trim() !== '') {
-        q = query(q, where("address.zip", "==", zip));
-      }
+      // if (zip && zip.trim() !== '') {
+      //   q = query(q, where("address.zip", "==", zip));
+      // }
 
       //Apply the filters
       Object.entries(filters).forEach(([key, value]) => {
@@ -145,8 +145,6 @@ function Search() {
           }
         }
       });
-
-      console.log(q);
 
       // Execute the query
       const querySnapshot = await getDocs(q);
@@ -181,14 +179,14 @@ function Search() {
         <Divider sx={{ marginTop: '8px', borderColor: 'black' }} />
       </ AppBar>
 
-      <div style={{ display: 'flex', width: '100%', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flex: 1, width: '100%', overflow: 'hidden' }}>
         {view === 'map' && 
           <div style={{ flex: 1 }}>
             <MapSection mapCenter={mapCenter} searchResults={results} />
           </div>
         }
         <div style={{ flex: 1, padding: '0px' }}>
-          <ResultSection searchResults={results} />
+          <ResultSection searchResults={results} viewMode={view} />
         </div>
       </div>
     </div>
