@@ -1,3 +1,14 @@
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Ensures the full height is used for the app */
+  width: 100%;  /* Ensures the full width is used for the app */
+  overflow: hidden; /* Optional: Prevents unwanted scrolling */
+}
+
+
 .App {
   text-align: center;
 }

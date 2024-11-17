@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { db } from '../../config/firebase';
 import { collection, addDoc, query, where, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
+import SendIcon from '@mui/icons-material/Send';
 import './Messages.css';
 
 const Messaging = () => {  
@@ -85,6 +86,11 @@ const Messaging = () => {
     }
   };
   
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '' || !conversationId) return;
@@ -102,7 +108,7 @@ const Messaging = () => {
   return (
     <div className="messaging-container">
       <div className="user-list">
-        <h2>Users</h2>
+        <h2>Direct Messages</h2>
         {users.length > 0 ? (
           users.map((otherUser, index) => (
             <div
@@ -110,7 +116,21 @@ const Messaging = () => {
               className="user-item"
               onClick={() => handleUserClick(otherUser)}
             >
-              {otherUser.displayName || `${otherUser.firstName} ${otherUser.lastName}` || 'Unknown User'}
+              <img
+                src={
+                  otherUser.pfpURL || 
+                  "https://cdn.vectorstock.com/i/preview-2x/92/16/default-profile-picture-avatar-user-icon-vector-46389216.webp" // Default image if no profile picture URL
+                }
+                alt={`${otherUser.displayName || otherUser.firstName || 'Unknown'}'s avatar`}
+                className="user-avatar"
+              />
+
+              {/* Display name */}
+              <span className="user-name">
+                {otherUser.displayName || 
+                `${otherUser.firstName || ''} ${otherUser.lastName || ''}`.trim() || 
+                "Unknown User"}
+              </span>
             </div>
           ))
         ) : (
@@ -137,9 +157,10 @@ const Messaging = () => {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Type your message..."
           />
-          <button onClick={handleSendMessage}>Send</button>
+          <button onClick={handleSendMessage}><SendIcon /></button>
         </div>
       </div>
     </div>
