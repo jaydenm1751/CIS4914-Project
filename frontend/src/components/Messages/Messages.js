@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { db } from '../../config/firebase';
-import { collection, addDoc, query, where, getDoc, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDoc, getDocs, doc, setDoc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
+import SendIcon from '@mui/icons-material/Send';
 import './Messages.css';
 
 const Messaging = () => {  
@@ -105,9 +106,14 @@ const Messaging = () => {
     } else {
         console.log("No conversation found.");
         setMessages([]);
-    }
-};
+    } 
+  };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '' || !selectedUser || !user) return;
@@ -118,7 +124,7 @@ const Messaging = () => {
 
         // Debug statement
         console.log(`Saving to path: users/${user.uid}/conversations/${selectedUser.id}`);
-
+        // const messageKey = `msg_${new Date().getTime()}`;
         // Create the new message object
         const newMessage = {
             text: inputMessage,
@@ -128,16 +134,14 @@ const Messaging = () => {
         };
 
         // Use `setDoc` to create or update the conversation document
-        await setDoc(conversationRef, { 
-            participants: [user.uid, selectedUser.id]
-        }, { merge: true });
+        await updateDoc(conversationRef, { 
+            messages: arrayUnion(newMessage)
+        });
 
         // Add the message to the `messages` subcollection within the conversation
-        const messagesRef = collection(conversationRef, 'messages');
-        await addDoc(messagesRef, newMessage);
-
         // Debug statement
         console.log("Message sent:", newMessage);
+
 
         // Update local state for messages
         setMessages(prevMessages => [...prevMessages, newMessage]);
@@ -199,10 +203,10 @@ const Messaging = () => {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            //onKeyDown={handleKeyDown}
+            onKeyDown={handleKeyDown}
             placeholder="Type your message..."
           />
-         {/* <button onClick={handleSendMessage}><SendIcon /></button> */}
+         <button onClick={handleSendMessage}><SendIcon /></button>
         </div>
       </div>
     </div>
