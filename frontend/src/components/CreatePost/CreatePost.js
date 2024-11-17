@@ -104,7 +104,7 @@ const CreatePost = () => {
       const subleaseData = {
         title,
         description,
-        rent: Number(rent), // Ensure data type is number
+        rent: Number(rent), 
         numBedrooms: Number(numBedrooms),
         numBathrooms: Number(numBathrooms),
         sqft: Number(sqft),

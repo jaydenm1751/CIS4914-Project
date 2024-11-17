@@ -10,22 +10,25 @@ import SubleaseDetails from './components/SubleaseDetails/SubleaseDetails.js';
 import UserContextProvider from './contexts/UserContext.js';
 import CreatePost from './components/CreatePost/CreatePost.js';
 import AuthRedirect from './components/Auth/AuthRedirect.js';
+import { GoogleMapsProvider } from './contexts/GoogleMapsContext.js';
 
 function App() {
   return (
     <div>
       <UserContextProvider>
-        <NavBar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/favorites" element={<Favorites />} />
-          <Route path="/sublease/:id" element={<SubleaseDetails />} />
-          <Route path="/create-post" element={<CreatePost />} />
-          <Route path="/login" element={<AuthRedirect />} />
-        </Routes>
+        <GoogleMapsProvider>
+          <NavBar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/sublease/:id" element={<SubleaseDetails />} />
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/login" element={<AuthRedirect />} />
+          </Routes>
+        </GoogleMapsProvider>
       </UserContextProvider>
     </div> 
   );
