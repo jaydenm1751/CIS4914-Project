@@ -2,8 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { db } from '../../config/firebase';
-import { collection, addDoc, query, where, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
+<<<<<<< Updated upstream
 import SendIcon from '@mui/icons-material/Send';
+import { collection, addDoc, query, where, getDoc, getDoc, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
+=======
+import { collection, addDoc, query, where, getDoc, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
+>>>>>>> Stashed changes
 import './Messages.css';
 
 const Messaging = () => {  
@@ -17,73 +21,187 @@ const Messaging = () => {
         navigate('/login?redirect=/messages');
       }
     }
-  }, [user, loading]);
+<<<<<<< Updated upstream
+  }, [user, loading, navigate, navigate]);
+=======
+  }, [user, loading, navigate]);
+>>>>>>> Stashed changes
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
 
+  // Fetch conversations to get users who have active conversations with the current user
+<<<<<<< Updated upstream
+  // Fetch conversations to get users who have active conversations with the current user
+=======
+>>>>>>> Stashed changes
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchConversations = async () => {
+      if (!user) return;
+
       try {
+        const conversationsRef = collection(db, `users/${user.uid}/conversations`);
+        console.log("Conversations Reference: ", conversationsRef);
+        const conversationsSnapshot = await getDocs(conversationsRef);
+        if (conversationsSnapshot.empty) {
+          console.log("No conversations found for this user."); // Debug: Check if collection is empty
+        } else {
+          console.log("Conversations Snapshot Size:", conversationsSnapshot.size); // Debug: Check snapshot size
+        }
+  
+
+        const participantIds = [];
+        conversationsSnapshot.forEach((docSnapshot) => {
+          const conversationData = docSnapshot.data();
+          console.log("Conversation Document ID:", docSnapshot.id); // Debugging line
+          console.log("Conversation Data:", conversationData);
+          
+          if (conversationData.participants){
+            conversationData.participants.forEach((participantId) => {
+              if (participantId !== user.uid) { // Exclude the current user’s ID
+                participantIds.push(participantId);
+              }
+            });
+          } else {
+            console.warn(`Conversation ${docSnapshot.id} has no participants array`);
+          }
+        });
+
+        // Fetch user profiles for each participant
+<<<<<<< Updated upstream
+    const fetchConversations = async () => {
+      if (!user) return;
+
+      try {
+        const conversationsRef = collection(db, `users/${user.uid}/conversations`);
+        console.log("Conversations Reference: ", conversationsRef);
+        const conversationsSnapshot = await getDocs(conversationsRef);
+        if (conversationsSnapshot.empty) {
+          console.log("No conversations found for this user."); // Debug: Check if collection is empty
+        } else {
+          console.log("Conversations Snapshot Size:", conversationsSnapshot.size); // Debug: Check snapshot size
+        }
+  
+
+        const participantIds = [];
+        conversationsSnapshot.forEach((docSnapshot) => {
+          const conversationData = docSnapshot.data();
+          console.log("Conversation Document ID:", docSnapshot.id); // Debugging line
+          console.log("Conversation Data:", conversationData);
+          
+          if (conversationData.participants){
+            conversationData.participants.forEach((participantId) => {
+              if (participantId !== user.uid) { // Exclude the current user’s ID
+                participantIds.push(participantId);
+              }
+            });
+          } else {
+            console.warn(`Conversation ${docSnapshot.id} has no participants array`);
+          }
+        });
+
+        // Fetch user profiles for each participant
+=======
+>>>>>>> Stashed changes
         const profilesRef = collection(db, 'profiles');
-        const querySnapshot = await getDocs(profilesRef);
-        
-        const fetchedUsers = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(fetchedUser => fetchedUser.id !== user.uid);
+        const fetchedUsers = [];
+        for (const participantId of participantIds) {
+          console.log(`Fetching profile for participant ID: ${participantId}`);
+          const participantDocRef = doc(profilesRef, participantId);
+          const participantDoc = await getDoc(participantDocRef);
+          console.log("Participant Document:", participantDoc); // Debugging line
+
+          if (participantDoc.exists()) {
+            fetchedUsers.push({ id: participantId, ...participantDoc.data() });
+          }
+        }
+<<<<<<< Updated upstream
+        const fetchedUsers = [];
+        for (const participantId of participantIds) {
+          console.log(`Fetching profile for participant ID: ${participantId}`);
+          const participantDocRef = doc(profilesRef, participantId);
+          const participantDoc = await getDoc(participantDocRef);
+          console.log("Participant Document:", participantDoc); // Debugging line
+
+          if (participantDoc.exists()) {
+            fetchedUsers.push({ id: participantId, ...participantDoc.data() });
+          }
+        }
 
         setUsers(fetchedUsers);
-        console.log('Fetched users:', fetchedUsers);
+        console.log('Fetched users with conversations:', fetchedUsers);
+        console.log('Fetched users with conversations:', fetchedUsers);
       } catch (error) {
-        console.error("Error fetching users: ", error);
+        console.error("Error fetching conversations:", error);
+        console.error("Error fetching conversations:", error);
+=======
+
+        setUsers(fetchedUsers);
+        console.log('Fetched users with conversations:', fetchedUsers);
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+>>>>>>> Stashed changes
       }
     };
 
-    if (user) {
-      fetchUsers();
-    }
+    fetchConversations();
+<<<<<<< Updated upstream
+    fetchConversations();
+=======
+>>>>>>> Stashed changes
   }, [user]);
 
   const handleUserClick = async (otherUser) => {
     setSelectedUser(otherUser);
     setMessages([]); // Clear messages when a new user is selected
-  
-    // Query to find existing conversation
-    const conversationQuery = query(
-      collection(db, 'conversations'),
-      where('participants', 'array-contains', user.uid)
-    );
-  
-    const conversationSnapshot = await getDocs(conversationQuery);
-    let existingConversation = null;
-  
-    conversationSnapshot.forEach(docSnapshot => {
-      const conversationData = docSnapshot.data();
-      if (conversationData.participants.includes(otherUser.id)) {
-        existingConversation = { id: docSnapshot.id, ...conversationData };
-      }
-    });
-  
-    if (existingConversation) {
-      // Conversation exists
-      setConversationId(existingConversation.id);
-  
-      // Access the `messages` map directly
-      const loadedMessages = existingConversation.messages ? Object.values(existingConversation.messages) : [];
-      console.log("Loaded messages:", loadedMessages); // Debugging line
-      setMessages(loadedMessages);
+
+    // Reference to the specific conversation document
+    const conversationRef = doc(db, `users/${user.uid}/conversations/${otherUser.id}`);
+
+    // Fetch the conversation document
+    const conversationDoc = await getDoc(conversationRef);
+    if (conversationDoc.exists()) {
+        const conversationData = conversationDoc.data();
+
+        // Debugging output
+        console.log("Conversation data:", conversationData);
+
+        // Assuming `messages` is a map field with a structure similar to: { messageId1: { text, senderId, timestamp }, ... }
+        const loadedMessages = conversationData.messages
+            ? Object.values(conversationData.messages)  // Convert map to an array
+            : [];
+
+        console.log("Loaded messages from map field:", loadedMessages);
+        setMessages(loadedMessages);
+<<<<<<< Updated upstream
+
+    // Reference to the specific conversation document
+    const conversationRef = doc(db, `users/${user.uid}/conversations/${otherUser.id}`);
+
+    // Fetch the conversation document
+    const conversationDoc = await getDoc(conversationRef);
+    if (conversationDoc.exists()) {
+        const conversationData = conversationDoc.data();
+
+        // Debugging output
+        console.log("Conversation data:", conversationData);
+
+        // Assuming `messages` is a map field with a structure similar to: { messageId1: { text, senderId, timestamp }, ... }
+        const loadedMessages = conversationData.messages
+            ? Object.values(conversationData.messages)  // Convert map to an array
+            : [];
+
+        console.log("Loaded messages from map field:", loadedMessages);
+        setMessages(loadedMessages);
+=======
+>>>>>>> Stashed changes
     } else {
-      // Conversation does not exist, create a new one
-      const newConversationRef = doc(collection(db, 'conversations'));
-      await setDoc(newConversationRef, {
-        participants: [user.uid, otherUser.id],
-        messages: {} // Initialize messages as an empty object
-      });
-      setConversationId(newConversationRef.id);
+        console.log("No conversation found.");
+        setMessages([]);
     }
+<<<<<<< Updated upstream
   };
   
   const handleKeyDown = (e) => {
@@ -91,18 +209,85 @@ const Messaging = () => {
       handleSendMessage();
     }
   };
+=======
+};
+>>>>>>> Stashed changes
+
 
   const handleSendMessage = async () => {
-    if (inputMessage.trim() === '' || !conversationId) return;
+    if (inputMessage.trim() === '' || !selectedUser || !user) return;
 
-    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
-    await addDoc(messagesRef, {
-      text: inputMessage,
-      senderId: user.uid,
-      timestamp: new Date(),
-    });
+    try {
+        // Path for the conversation subcollection within the user's document
+        const conversationRef = doc(db, `users/${user.uid}/conversations/${selectedUser.id}`);
 
-    setInputMessage('');
+        // Debug statement
+        console.log(`Saving to path: users/${user.uid}/conversations/${selectedUser.id}`);
+
+        // Create the new message object
+        const newMessage = {
+            text: inputMessage,
+            senderId: user.uid,
+            receiverId: selectedUser.id,
+            timestamp: new Date(),
+        };
+
+        // Use `setDoc` to create or update the conversation document
+        await setDoc(conversationRef, { 
+            participants: [user.uid, selectedUser.id]
+        }, { merge: true });
+
+        // Add the message to the `messages` subcollection within the conversation
+        const messagesRef = collection(conversationRef, 'messages');
+        await addDoc(messagesRef, newMessage);
+
+        // Debug statement
+        console.log("Message sent:", newMessage);
+
+        // Update local state for messages
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+        setInputMessage('');
+    } catch (error) {
+        console.error("Error sending message:", error);
+    }
+<<<<<<< Updated upstream
+    if (inputMessage.trim() === '' || !selectedUser || !user) return;
+
+    try {
+        // Path for the conversation subcollection within the user's document
+        const conversationRef = doc(db, `users/${user.uid}/conversations/${selectedUser.id}`);
+
+        // Debug statement
+        console.log(`Saving to path: users/${user.uid}/conversations/${selectedUser.id}`);
+
+        // Create the new message object
+        const newMessage = {
+            text: inputMessage,
+            senderId: user.uid,
+            receiverId: selectedUser.id,
+            timestamp: new Date(),
+        };
+
+        // Use `setDoc` to create or update the conversation document
+        await setDoc(conversationRef, { 
+            participants: [user.uid, selectedUser.id]
+        }, { merge: true });
+
+        // Add the message to the `messages` subcollection within the conversation
+        const messagesRef = collection(conversationRef, 'messages');
+        await addDoc(messagesRef, newMessage);
+
+        // Debug statement
+        console.log("Message sent:", newMessage);
+
+        // Update local state for messages
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+        setInputMessage('');
+    } catch (error) {
+        console.error("Error sending message:", error);
+    }
+=======
+>>>>>>> Stashed changes
   };
 
   return (
@@ -141,15 +326,27 @@ const Messaging = () => {
       <div className="messages-container">
       <div className="messages">
         <h2>{selectedUser ? `Messages with ${selectedUser.displayName || selectedUser.firstName}` : 'Select a user'}</h2>
-        {messages.length > 0 ? (
-          messages.map((msg, index) => (
-            <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
-              <span>{msg.senderId === user.uid ? 'You' : selectedUser.displayName || selectedUser.firstName}:</span> {msg.text}
-            </div>
-          ))
-        ) : (
-          <div>No messages yet.</div>
-        )}
+          {messages.length > 0 ? (
+            messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
+                <span>{msg.senderId === user.uid ? 'You' : selectedUser.displayName || selectedUser.firstName}:</span> {msg.text}
+              </div>
+            ))
+          ) : (
+            <div>No messages yet.</div>
+          )}
+<<<<<<< Updated upstream
+          {messages.length > 0 ? (
+            messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
+                <span>{msg.senderId === user.uid ? 'You' : selectedUser.displayName || selectedUser.firstName}:</span> {msg.text}
+              </div>
+            ))
+          ) : (
+            <div>No messages yet.</div>
+          )}
+=======
+>>>>>>> Stashed changes
       </div>
 
         <div className="send-message">

@@ -162,9 +162,11 @@ const SubleaseDetails = () => {
     try {
       const senderID = user.uid;
       const receiverID = sublease.userID; // Assuming `sublease` contains userId of the post owner
-      const conversationId= [senderID, receiverID].sort().join('_'); // Unique ID for conversation
-  
-      const conversationRef = doc(db, 'conversations', conversationId);
+      const conversationPath = `users/${senderID}/conversations/${receiverID}`;
+      
+      console.log("Conversation path: ", conversationPath);
+     
+      const conversationRef = doc(db, conversationPath);
       const messageData = {
         text: inputMessage,
         senderID,
