@@ -62,7 +62,6 @@ const SubleasePost = ({ id, address, rent, numBedrooms, numBathrooms, sqft, imag
 
   return (
     <div className="sublease-post">
-      <div className="sublease-post-rank">#1</div> {/* Ranking Badge */}
       <img
         src={imageUrl}
         alt="Sublease"

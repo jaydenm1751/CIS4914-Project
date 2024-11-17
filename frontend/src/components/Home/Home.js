@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import HomeHeader from './HomeHeader';
 import './Home.css';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
@@ -25,13 +26,10 @@ const Home = () => {
         fetchSubleasePosts();
     }, []);
 
-    // Function to handle button click
-    const handleCreatePostClick = () => {
-        navigate('/create-post'); // Navigate to Create Post page
-    };
-
     return (
         <div className="home-container">
+            <HomeHeader />
+
             <div className="post-list">
                 {subleasePosts.map((post) => (
                     <SubleasePost
@@ -45,24 +43,6 @@ const Home = () => {
                         imageUrl={post.imageUrls}
                     />
                 ))}
-            </div>
-
-            {/* Create Post Button */}
-            <div style={{ textAlign: 'center', margin: '20px 0' }}>
-                <button
-                    onClick={handleCreatePostClick}
-                    style={{
-                        padding: '12px 24px',
-                        backgroundColor: '#007bff', // Blue background
-                        color: 'white', // White text
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                    }}
-                >
-                    Create Post
-                </button>
             </div>
         </div>
     );
