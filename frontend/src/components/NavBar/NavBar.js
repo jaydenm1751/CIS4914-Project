@@ -22,6 +22,10 @@ const NavBar = () => {
     await logout();
   }
 
+  const handleCreatePostClick = () => {
+    navigate('/create-post'); // Navigate to Create Post page
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-logo" onClick={handleLogoClick}>
@@ -32,6 +36,25 @@ const NavBar = () => {
           Search Apartments
         </button>
       </div>
+
+      {/* Create Post Button */}
+      <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                <button
+                    onClick={handleCreatePostClick}
+                    style={{
+                        padding: '10px 24px',
+                        backgroundColor: '#007bff', // Blue background
+                        color: 'white', // White text
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                    }}
+                >
+                    Create Post
+                </button>
+        </div>
+
       <div className="navbar-menu">
         <button className="menu-button">Menu</button>
         <div className="dropdown-content">

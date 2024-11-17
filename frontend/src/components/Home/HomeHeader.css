@@ -1,0 +1,51 @@
+.header-container {
+    text-align: center;
+    margin: 20px;
+}
+
+.header-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #000;
+}
+
+.header-description {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.header-highlight {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.header-italic {
+    font-style: italic;
+}
+
+.header-link {
+    font-size: 1rem;
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.most-views-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fire-icon {
+    font-size: 50px !important;
+    color: orange;
+    margin-bottom: -30px;
+}
+
+.most-views-text {
+    font-size: 30px;
+    font-weight: bold;
+    color: #E37A13;
+}

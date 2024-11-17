@@ -4,7 +4,7 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   padding: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   position: relative;
   /* z-index: -10; */
 }
@@ -30,7 +30,7 @@
   height: 250px;
   object-fit: cover;
   border-radius: 5px;
-  margin-right: 20px;
+  margin-right: 15px;
   cursor: pointer;
 }
 
@@ -38,22 +38,22 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  flex-grow: 1;
 }
 
 .sublease-post-details h3 {
-  font-size: 18px;
-  margin-bottom: 5px;
+  margin: 0px;
+  font-size: 20px;
   color: #0056b3; /* Similar to the blue heading in the screenshot */
 }
 
 .sublease-post-beds-baths-sqft {
   font-size: 16px;
-  margin-bottom: 10px;
 }
 
 .sublease-post-rent {
-  font-size: 18px; 
-  margin-bottom: 15px;
+  font-size: 20px; 
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
 }
