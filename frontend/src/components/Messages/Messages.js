@@ -121,8 +121,15 @@ const Messaging = () => {
     if (inputMessage.trim() === '' || !selectedUser || !user) return;
 
     try {
+        const senderId = user.uid;
+        const receiverId = selectedUser.id;
+        const timestamp = new Date();
         // Path for the conversation subcollection within the user's document
-        const conversationRef = doc(db, `users/${user.uid}/conversations/${selectedUser.id}`);
+        const senderConversationPath = `users/${senderId}/conversations/${receiverId}`;
+        const receiverConversationPath = `users/${receiverId}/conversations/${senderId}`;
+        
+        const senderConversationRef = doc(db, senderConversationPath);
+        const receiverConversationRef = doc(db, receiverConversationPath)
 
         // Debug statement
         console.log(`Saving to path: users/${user.uid}/conversations/${selectedUser.id}`);
@@ -130,15 +137,43 @@ const Messaging = () => {
         // Create the new message object
         const newMessage = {
             text: inputMessage,
-            senderId: user.uid,
-            receiverId: selectedUser.id,
-            timestamp: new Date(),
+            senderId,
+            receiverId,
+            timestamp,
         };
 
-        // Use `setDoc` to create or update the conversation document
-        await updateDoc(conversationRef, { 
-            messages: arrayUnion(newMessage)
-        });
+        // Update both conversations
+        await Promise.all([
+          updateDoc(senderConversationRef, {
+            messages: arrayUnion(newMessage),
+            participants: [senderId, receiverId],
+          }).catch(async (error) => {
+            // If the sender's conversation doesn't exist, create it
+            if (error.code === 'not-found') {
+              await setDoc(senderConversationRef, {
+                messages: [newMessage],
+                participants: [senderId, receiverId],
+              });
+            } else {
+              throw error;
+            }
+          }),
+
+          updateDoc(receiverConversationRef, {
+            messages: arrayUnion(newMessage),
+            participants: [receiverId, senderId],
+          }).catch(async (error) => {
+            // If the receiver's conversation doesn't exist, create it
+            if (error.code === 'not-found') {
+              await setDoc(receiverConversationRef, {
+                messages: [newMessage],
+                participants: [receiverId, senderId],
+              });
+            } else {
+              throw error;
+            }
+          }),
+        ]);
 
         // Add the message to the `messages` subcollection within the conversation
         // Debug statement
