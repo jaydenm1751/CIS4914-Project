@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { db } from '../../config/firebase';
-import { collection, addDoc, query, where, getDoc, getDocs, doc, setDoc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDoc, getDocs, doc, setDoc, updateDoc, arrayUnion, onSnapshot, Timestamp } from 'firebase/firestore';
 import SendIcon from '@mui/icons-material/Send';
 import './Messages.css';
 
@@ -153,6 +153,39 @@ const Messaging = () => {
     }
   };
 
+  // Helper function to format the message timestamp
+const formatMessageTime = (timestamp) => {
+  if (!timestamp) return 'No timestamp';
+
+  // Convert Firestore Timestamp to JavaScript Date if necessary
+  const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
+
+  // Get today's date and compare
+  const today = new Date();
+  const isSameDay = today.toDateString() === date.toDateString();
+
+  // Format time (HH:MM AM/PM)
+  const timeFormatOptions = {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  };
+  const time = date.toLocaleString('en-US', timeFormatOptions);
+
+  if (isSameDay) {
+    // If it's today, just show time
+    return time;
+  } else {
+    // If it's from a previous day, show date and time
+    const dateFormatOptions = {
+      month: '2-digit',
+      day: '2-digit',
+    };
+    const dateFormatted = date.toLocaleString('en-US', dateFormatOptions);
+    return `${dateFormatted}, ${time}`;
+  }
+};
+
   return (
     <div className="messaging-container">
       <div className="user-list">
@@ -161,7 +194,7 @@ const Messaging = () => {
           users.map((otherUser, index) => (
             <div
               key={index}
-              className="user-item"
+              className={`user-item ${selectedUser && selectedUser.id === otherUser.id ? 'selected' : ''}`} // Add conditional 'selected' class
               onClick={() => handleUserClick(otherUser)}
             >
               <img
@@ -191,13 +224,18 @@ const Messaging = () => {
         <h2>{selectedUser ? `Messages with ${selectedUser.displayName || selectedUser.firstName}` : 'Select a user'}</h2>
           {messages.length > 0 ? (
             messages.map((msg, index) => {
-              // console.log("Message object:", msg);
               const isSentByUser = msg.senderId === user.uid;
-              // console.log(msg.senderId);
+              const messageTime = formatMessageTime(msg.timestamp);
+
               return (
-              <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
-                <span>{isSentByUser ? 'You' : selectedUser.displayName || selectedUser.firstName}:</span> {msg.text}
-              </div>
+                <div key={index} className="message-wrapper">
+                  <div className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
+                    {msg.text}
+                  </div>
+                  <div className={`timestamp ${msg.senderId === user.uid ? 'sent-timestamp' : 'received-timestamp'}`}>
+                  {messageTime}
+                </div>
+                </div>
               );
             })
           ) : (
