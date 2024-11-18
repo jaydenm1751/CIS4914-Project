@@ -115,7 +115,9 @@ const Messaging = () => {
     }
   };
 
+  //messages.js sendMessage
   const handleSendMessage = async () => {
+    console.log("logged in user id: ", user.uid);
     if (inputMessage.trim() === '' || !selectedUser || !user) return;
 
     try {
@@ -188,11 +190,16 @@ const Messaging = () => {
       <div className="messages">
         <h2>{selectedUser ? `Messages with ${selectedUser.displayName || selectedUser.firstName}` : 'Select a user'}</h2>
           {messages.length > 0 ? (
-            messages.map((msg, index) => (
+            messages.map((msg, index) => {
+              // console.log("Message object:", msg);
+              const isSentByUser = msg.senderId === user.uid;
+              // console.log(msg.senderId);
+              return (
               <div key={index} className={`message ${msg.senderId === user.uid ? 'sent' : 'received'}`}>
-                <span>{msg.senderId === user.uid ? 'You' : selectedUser.displayName || selectedUser.firstName}:</span> {msg.text}
+                <span>{isSentByUser ? 'You' : selectedUser.displayName || selectedUser.firstName}:</span> {msg.text}
               </div>
-            ))
+              );
+            })
           ) : (
             <div>No messages yet.</div>
           )}
