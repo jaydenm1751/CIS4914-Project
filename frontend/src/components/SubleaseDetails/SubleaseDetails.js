@@ -138,7 +138,9 @@ const SubleaseDetails = () => {
     ),
   };
 
+  //subleaseDetails.js sendMessage
   const handleSendMessage = async (e) => {
+    console.log("logged in user id: ", user.uid);
     e.preventDefault();
 
     console.log("Current user:", user); 
@@ -160,17 +162,17 @@ const SubleaseDetails = () => {
     if (inputMessage.trim() === '') return;
   
     try {
-      const senderID = user.uid;
-      const receiverID = sublease.userID; // Assuming `sublease` contains userId of the post owner
-      const conversationPath = `users/${senderID}/conversations/${receiverID}`;
+      const senderId = user.uid;
+      const receiverId = sublease.userID; // Assuming `sublease` contains userId of the post owner
+      const conversationPath = `users/${senderId}/conversations/${receiverId}`;
       
       console.log("Conversation path: ", conversationPath);
      
       const conversationRef = doc(db, conversationPath);
       const messageData = {
         text: inputMessage,
-        senderID,
-        receiverID,
+        senderId,
+        receiverId,
         timestamp: new Date(),
       };
   
@@ -178,7 +180,7 @@ const SubleaseDetails = () => {
       const conversationDoc = await getDoc(conversationRef);
       if (!conversationDoc.exists()) {
         await setDoc(conversationRef, {
-          participants: [senderID, receiverID],
+          participants: [senderId, receiverId],
           messages: [messageData],
         });
       } else {
