@@ -63,9 +63,10 @@ function Search() {
   const setDefaultLocation = () => {
     const defaultLat = 29.64991;
     const defaultLng = -82.34866;
-    mapCenter = { defaultLat, defaultLng };
+    setMapCenter({ lat: defaultLat, lng: defaultLng });
     reverseGeocode(defaultLat, defaultLng); 
   };
+
 
   const handleApplyFilters = (newFilters) => {
     setFilters(newFilters);
