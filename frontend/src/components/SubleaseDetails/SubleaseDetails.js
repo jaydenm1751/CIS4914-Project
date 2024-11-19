@@ -164,30 +164,56 @@ const SubleaseDetails = () => {
     try {
       const senderId = user.uid;
       const receiverId = sublease.userID; // Assuming `sublease` contains userId of the post owner
-      const conversationPath = `users/${senderId}/conversations/${receiverId}`;
+      const senderConversationPath = `users/${senderId}/conversations/${receiverId}`;
+      const timestamp = new Date();
+
+      const receiverConversationPath = `users/${receiverId}/conversations/${senderId}`;
+      const receiverConversationRef = doc(db, receiverConversationPath);
       
-      console.log("Conversation path: ", conversationPath);
+      console.log("Conversation path: ", senderConversationPath);
      
-      const conversationRef = doc(db, conversationPath);
-      const messageData = {
+      const senderConversationRef = doc(db, senderConversationPath);
+      const newMessage = {
         text: inputMessage,
         senderId,
         receiverId,
-        timestamp: new Date(),
+        timestamp,
       };
   
       // Check if conversation exists, if not, create it
-      const conversationDoc = await getDoc(conversationRef);
-      if (!conversationDoc.exists()) {
-        await setDoc(conversationRef, {
+      // Update both conversations
+      await Promise.all([
+        updateDoc(senderConversationRef, {
+          messages: arrayUnion(newMessage),
           participants: [senderId, receiverId],
-          messages: [messageData],
-        });
-      } else {
-        await updateDoc(conversationRef, {
-          messages: arrayUnion(messageData),
-        });
-      }
+        }).catch(async (error) => {
+          // If the sender's conversation doesn't exist, create it
+          if (error.code === 'not-found') {
+            await setDoc(senderConversationRef, {
+              messages: [newMessage],
+              participants: [senderId, receiverId],
+            });
+          } else {
+            throw error;
+          }
+        }),
+
+        updateDoc(receiverConversationRef, {
+          messages: arrayUnion(newMessage),
+          participants: [receiverId, senderId],
+        }).catch(async (error) => {
+          // If the receiver's conversation doesn't exist, create it
+          if (error.code === 'not-found') {
+            await setDoc(receiverConversationRef, {
+              messages: [newMessage],
+              participants: [receiverId, senderId],
+            });
+          } else {
+            throw error;
+          }
+        }),
+      ]);
+
   
       setInputMessage(''); // Clear the input
       alert('Message sent successfully!');
