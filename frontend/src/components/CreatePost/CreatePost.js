@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import './CreatePost.css';
 import backArrow from '../../assets/images/backArrow.png';
 
-const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls'; // Replace with your Google API key
+const GOOGLE_API_KEY = 'AIzaSyDnSV7ev8TKKTTzC8moLgAFBLF94dZ13Ls';
 
 const CreatePost = () => {
   const [title, setTitle] = useState('');
@@ -18,8 +18,8 @@ const CreatePost = () => {
   const [sqft, setSqft] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const { user, loading } = useContext(UserContext);
-  
-  // Address fields
+
+
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -32,7 +32,7 @@ const CreatePost = () => {
       if (!user) {
         console.log('User is not logged in. Redirecting to login...');
         navigate('/login?redirect=/create-post');
-      } 
+      }
     }
   }, [user, loading, navigate]);
 
@@ -62,9 +62,9 @@ const CreatePost = () => {
     try {
       const response = await fetch(apiUrl);
       const data = await response.json();
-      
+
       if (data.status === "OK" && data.results.length > 0) {
-        return true; // Address is valid
+        return true;
       } else {
         alert("Please enter a valid address.");
         return false;
@@ -78,20 +78,24 @@ const CreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate if rent, sqft, numBedrooms, and numBathrooms are numbers
+
+    if (imageFiles.length === 0) {
+      alert("Please upload at least one image to create a post.");
+      return;
+    }
+
     const numericFields = { rent, sqft, numBedrooms, numBathrooms };
     for (const [fieldName, value] of Object.entries(numericFields)) {
       if (isNaN(value) || value <= 0) {
         alert(`${fieldName} must be a positive number.`);
-        return; // Stop submission if validation fails
+        return;
       }
     }
-  
+
     if (!await validateAddress()) {
-      return; // Stop submission if the address is invalid
+      return;
     }
-  
+
     try {
       const imageUrls = [];
       for (let file of imageFiles) {
@@ -100,11 +104,11 @@ const CreatePost = () => {
         const downloadUrl = await getDownloadURL(snapshot.ref);
         imageUrls.push(downloadUrl);
       }
-  
+
       const subleaseData = {
         title,
         description,
-        rent: Number(rent), 
+        rent: Number(rent),
         numBedrooms: Number(numBedrooms),
         numBathrooms: Number(numBathrooms),
         sqft: Number(sqft),
@@ -112,10 +116,10 @@ const CreatePost = () => {
         address: { street, city, state, zip },
         userID: user.uid,
       };
-  
+
       await addDoc(collection(db, 'subleases'), subleaseData);
-  
-      // Clear form after submission
+
+    
       setTitle('');
       setDescription('');
       setRent('');
@@ -128,7 +132,7 @@ const CreatePost = () => {
       setZip('');
       setImageFiles([]);
       alert('Sublease created successfully!');
-  
+
       navigate('/');
     } catch (error) {
       console.error('Error creating sublease:', error);
