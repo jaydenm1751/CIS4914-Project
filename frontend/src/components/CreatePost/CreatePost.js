@@ -88,6 +88,8 @@ const CreatePost = () => {
     setImageFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
+
+
   const validateAddress = async () => {
     if (!street || !city || !state || !zip) {
       alert("Please complete all address fields.");
@@ -117,8 +119,8 @@ const CreatePost = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (imageFiles.length === 0) {
-      alert("Please upload at least one image to create a post.");
+    if (imageFiles.length < 2) {
+      alert("Please upload at least two images to create a post.");
       return;
     }
 
