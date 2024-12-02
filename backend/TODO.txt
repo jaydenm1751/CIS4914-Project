@@ -1,0 +1,20 @@
+//TODO
+
+Overall the functionality is done and we should focus on debugging if anything. Here are some ideas for more features that could be good and are intuitive anyway. Adding these would definitely help.
+
+Functionality:
+1. Login/out bugs (specifically when loggin out while on messages page--should throw you back to home)
+2. search on messages page for people/specific messages
+3. clicking a users profile on messages or on sublease details takes you to their profile page.
+4. followers/following
+5. sublease posts appear in your profile for easy access
+6. Share listings (email or other users on the app)
+7. email notifications (for messages)
+8. sending attachments in messages*** (this could be very hard)
+
+
+UI:
+1. Optional Dark mode
+2. Banner up top that divides icon and subleases
+3. Highlighted "important" details ex: price
+4. Share Icon -> hand in hand with number 6 on functionality.

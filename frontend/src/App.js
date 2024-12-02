@@ -26,6 +26,7 @@ function App() {
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/sublease/:id" element={<SubleaseDetails />} />
             <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/edit-sublease/:subleaseId" element={<CreatePost />} />
             <Route path="/login" element={<AuthRedirect />} />
           </Routes>
         </GoogleMapsProvider>

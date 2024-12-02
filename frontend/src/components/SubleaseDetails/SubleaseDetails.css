@@ -198,3 +198,39 @@
 .messages-link:hover {
   text-decoration: underline;
 }
+
+.edit-delete-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px; /* Adds spacing above the buttons */
+}
+
+.edit-button {
+  background-color: #FFD700; /* Yellow color */
+  color: #000; /* Black text */
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.edit-button:hover {
+  background-color: #FFC107; /* Slightly darker yellow on hover */
+}
+
+.delete-button {
+  background-color: #FF6347; /* Red color */
+  color: #FFF; /* White text */
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.delete-button:hover {
+  background-color: #FF4500; /* Slightly darker red on hover */
+}
