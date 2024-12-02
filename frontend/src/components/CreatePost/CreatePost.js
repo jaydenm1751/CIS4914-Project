@@ -25,6 +25,10 @@ const CreatePost = () => {
   const [state, setState] = useState('');
   const [zip, setZip] = useState('');
 
+  // New fields
+  const [moveInDate, setMoveInDate] = useState('');
+  const [moveOutDate, setMoveOutDate] = useState('');
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -114,12 +118,16 @@ const CreatePost = () => {
         sqft: Number(sqft),
         imageUrls,
         address: { street, city, state, zip },
+        leaseTerms: {
+          earliestMoveInDate: moveInDate,
+          earliestMoveOutDate: moveOutDate,
+        },
         userID: user.uid,
       };
 
       await addDoc(collection(db, 'subleases'), subleaseData);
 
-    
+      // Reset form
       setTitle('');
       setDescription('');
       setRent('');
@@ -131,6 +139,8 @@ const CreatePost = () => {
       setState('');
       setZip('');
       setImageFiles([]);
+      setMoveInDate('');
+      setMoveOutDate('');
       alert('Sublease created successfully!');
 
       navigate('/');
@@ -150,6 +160,7 @@ const CreatePost = () => {
           <form onSubmit={handleSubmit} className="create-post-form">
             <h2>Create a Post</h2>
 
+            {/* Other Fields */}
             <section className="form-inline">
               <div className="form-group title">
                 <label>Title</label>
@@ -297,6 +308,28 @@ const CreatePost = () => {
                   placeholder="Zip"
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
+                  required
+                />
+              </div>
+            </section>
+
+            
+            <section className="form-inline">
+              <div className="form-group move-in-out-date">
+                <label>Move-In Date</label>
+                <input
+                  type="date"
+                  value={moveInDate}
+                  onChange={(e) => setMoveInDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group move-in-out-date">
+                <label>Move-Out Date</label>
+                <input
+                  type="date"
+                  value={moveOutDate}
+                  onChange={(e) => setMoveOutDate(e.target.value)}
                   required
                 />
               </div>
