@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { useParams, useNavigate } from 'react-router-dom';
 // import { doc, getDoc } from 'firebase/firestore';
-import { collection, addDoc, getDoc, query, where, doc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, addDoc, getDoc, query, where, doc, setDoc, updateDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import SellIcon from '@mui/icons-material/Sell';
 import EventIcon from '@mui/icons-material/Event';
@@ -233,6 +233,38 @@ const SubleaseDetails = () => {
     centerMode: true,
   };
 
+  const handleEditDetails = () => {
+    console.log('inside edit button.');
+    console.log('Sublease:', sublease);
+    if (sublease?.id) {
+      console.log('sublease retrieved');
+      navigate(`/edit-sublease/${sublease.id}`);
+    }
+  };
+
+
+
+  const handleDelete = async () => {
+    if (!sublease?.id){
+      console.error('Sublease ID is missing. Cannot Delete.');
+      return;
+    }
+    const confirmDelete = window.confirm('Are you sure you want to delete this sublease?');
+    if (!confirmDelete) return;
+
+    try {
+      const subleaseRef = doc(db, 'subleases', sublease.id);
+      await deleteDoc(subleaseRef);
+
+      alert('Sublease deleted successfully!');
+      navigate('/'); // Redirect the user back to the home page or relevant page
+    } catch (error) {
+      console.error('Error deleting sublease:', error);
+      alert('Failed to delete the sublease. Please try again.');
+    }
+  };
+  
+
 
   // Convert Firestore Timestamps to JS Date objects, ensuring they exist first
   const earliestMoveInDate = leaseTerms?.earliestMoveInDate
@@ -332,16 +364,31 @@ const earliestMoveOutDate = leaseTerms?.earliestMoveOutDate
               value={inputMessage} // Bind to `inputMessage` state
               onChange={(e) => setInputMessage(e.target.value)} // Update `inputMessage` on change
             />
-
             <div className="button-container">
               <button type="submit">Send Message</button>
             </div>
           </form>
-
           <p className="conversation-notice">
             All your conversations can be seen in <span className="messages-link" onClick={() => navigate('/messages')}>Messages</span>
           </p>
         </div>
+        {/* Edit and Delete buttons */}
+        {user?.uid === sublease.userID && (
+            <div className="edit-delete-buttons">
+              <button
+                className="edit-button"
+                onClick={handleEditDetails}
+              >
+                Edit
+              </button>
+              <button
+                className="delete-button"
+                onClick={handleDelete}
+              >
+                Delete
+              </button>
+            </div>
+          )}
       </div>
     </div>
   );

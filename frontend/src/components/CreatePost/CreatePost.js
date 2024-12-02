@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { db, storage } from '../../config/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './CreatePost.css';
 import backArrow from '../../assets/images/backArrow.png';
 
@@ -19,6 +19,11 @@ const CreatePost = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const { user, loading } = useContext(UserContext);
 
+  //edit functionality
+  const { subleaseId } = useParams();
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentSubleaseId, setCurrentSubleaseId] = useState('');
+
 
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
@@ -32,13 +37,42 @@ const CreatePost = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
+    console.log('useEffect called.');
+    const fetchSublease = async () => {
+      console.log('fetchSublease called.');
+      if (subleaseId) {
+        setIsEditing(true); // Indicate we are in editing mode
+        setCurrentSubleaseId(subleaseId);
+        try {
+          const subleaseRef = doc(db, 'subleases', subleaseId);
+          const subleaseSnap = await getDoc(subleaseRef);
+          if (subleaseSnap.exists()) {
+            const subleaseData = subleaseSnap.data();
+            console.log("fetched Sublease data:", subleaseData);
+            setTitle(subleaseData.title || '');
+            setDescription(subleaseData.description || '');
+            setRent(subleaseData.rent || '');
+            setNumBedrooms(subleaseData.numBedrooms || '');
+            setNumBathrooms(subleaseData.numBathrooms || '');
+            setSqft(subleaseData.sqft || '');
+            setStreet(subleaseData.address?.street || '');
+            setCity(subleaseData.address?.city || '');
+            setState(subleaseData.address?.state || '');
+            setZip(subleaseData.address?.zip || '');
+            setImageFiles([]); // Do not set image files directly, they need to be re-uploaded
+          }
+        } catch (error) {
+          console.error("Error fetching sublease data:", error);
+        }
+      }
+    };
+    if (!loading && user) {
+      fetchSublease();
+    } else if (!loading && !user) {
         console.log('User is not logged in. Redirecting to login...');
         navigate('/login?redirect=/create-post');
-      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, subleaseId]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -124,24 +158,33 @@ const CreatePost = () => {
         },
         userID: user.uid,
       };
+      
+      if (isEditing) {
+        console.log('Editing Mode.');
+        // Update existing sublease
+        const subleaseRef = doc(db, 'subleases', subleaseId);
+        await updateDoc(subleaseRef, subleaseData);
+        alert('Sublease updated successfully!');
+      } else {
+        const subleaseRef = await addDoc(collection(db, 'subleases'), subleaseData);
 
-      await addDoc(collection(db, 'subleases'), subleaseData);
-
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setRent('');
-      setNumBedrooms('');
-      setNumBathrooms('');
-      setSqft('');
-      setStreet('');
-      setCity('');
-      setState('');
-      setZip('');
-      setImageFiles([]);
-      setMoveInDate('');
-      setMoveOutDate('');
-      alert('Sublease created successfully!');
+        await updateDoc(subleaseRef, { id: subleaseRef.id });
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setRent('');
+        setNumBedrooms('');
+        setNumBathrooms('');
+        setSqft('');
+        setStreet('');
+        setCity('');
+        setState('');
+        setZip('');
+        setImageFiles([]);
+        setMoveInDate('');
+        setMoveOutDate('');
+        alert('Sublease created successfully!');
+      }
 
       navigate('/');
     } catch (error) {
@@ -158,7 +201,7 @@ const CreatePost = () => {
           </button>
 
           <form onSubmit={handleSubmit} className="create-post-form">
-            <h2>Create a Post</h2>
+            <h2>{isEditing ? 'Edit Your Sublease' : 'Create a New Sublease'}</h2>
 
             {/* Other Fields */}
             <section className="form-inline">
@@ -336,7 +379,7 @@ const CreatePost = () => {
             </section>
 
             <button type="submit" className="submit-button">
-              Create Post
+              {isEditing ? 'Update Post' : 'Create Post'}
             </button>
           </form>
         </div>
