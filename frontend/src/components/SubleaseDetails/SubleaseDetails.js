@@ -267,13 +267,19 @@ const SubleaseDetails = () => {
 
 
   // Convert Firestore Timestamps to JS Date objects, ensuring they exist first
-  const earliestMoveInDate = leaseTerms?.earliestMoveInDate?.seconds 
-  ? new Date(leaseTerms.earliestMoveInDate.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+  const earliestMoveInDate = leaseTerms?.earliestMoveInDate
+  ? leaseTerms.earliestMoveInDate 
+    ? new Date(leaseTerms.earliestMoveInDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+    : 'Not specified'
   : 'Not specified';
 
-  const earliestMoveOutDate = leaseTerms?.earliestMoveOutDate?.seconds 
-  ? new Date(leaseTerms.earliestMoveOutDate.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+const earliestMoveOutDate = leaseTerms?.earliestMoveOutDate
+  ? leaseTerms.earliestMoveOutDate 
+    ? new Date(leaseTerms.earliestMoveOutDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+    : 'Not specified'
   : 'Not specified';
+
+
 
   return (
     <div className="sublease-container">
