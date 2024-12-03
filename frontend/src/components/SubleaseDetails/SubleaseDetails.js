@@ -242,8 +242,6 @@ const SubleaseDetails = () => {
     }
   };
 
-
-
   const handleDelete = async () => {
     if (!sublease?.id){
       console.error('Sublease ID is missing. Cannot Delete.');
@@ -263,8 +261,6 @@ const SubleaseDetails = () => {
       alert('Failed to delete the sublease. Please try again.');
     }
   };
-  
-
 
   // Convert Firestore Timestamps to JS Date objects, ensuring they exist first
   const earliestMoveInDate = leaseTerms?.earliestMoveInDate
@@ -278,8 +274,6 @@ const earliestMoveOutDate = leaseTerms?.earliestMoveOutDate
     ? new Date(leaseTerms.earliestMoveOutDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
     : 'Not specified'
   : 'Not specified';
-
-
 
   return (
     <div className="sublease-container">
