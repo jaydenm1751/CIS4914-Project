@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "subleaser-10437"
-  }
+    "default": "subleaser-10437",
+    "Subleaser": "subleaser-10437"
+  },
+  "targets": {},
+  "etags": {}
 }
